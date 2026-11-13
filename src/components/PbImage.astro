@@ -1,0 +1,18 @@
+---
+import { getImageUrl } from '../js/backend.ts';
+
+const { record, imageField, class: className } = Astro.props;
+
+const imageURL = getImageUrl(record, imageField);
+---
+
+{imageURL &&
+    <img
+        src={imageURL}
+        alt={record.nomProjet || 'Image'}
+        width={400}
+        height={300}
+        class={className}
+        loading="lazy"
+    />
+}

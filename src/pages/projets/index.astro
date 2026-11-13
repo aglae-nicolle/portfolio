@@ -1,0 +1,72 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+import { getProjets } from "../../lib/db";
+
+const filtre = Astro.url.searchParams.get("ecole") ?? undefined;
+const FILTRES = ["tous", "IUT MMI", "UTBM", "Personnels"];
+const projets = getProjets(filtre);
+---
+
+<Layout title="Mes projets">
+  <section class="pt-9.25 lg:pt-21.5">
+    <h1 class="text-h1 container-page">Mes projets</h1>
+
+    <!-- Filtres : 4 onglets sur toute la largeur, soulignés (jaune = actif).
+         Le trait jaune est un <span> à part avec un view-transition-name : au changement de filtre,
+         le navigateur le fait glisser de l'ancien onglet vers le nouveau (voir global.css). -->
+    <nav
+      class="filtres mt-7.25 grid grid-cols-4 lg:mt-5.25"
+      aria-label="Filtrer par école"
+    >
+      {FILTRES.map((f, i) => {
+        const href =
+          f === "tous" ? "/projets" : `/projets?ecole=${encodeURIComponent(f)}`;
+        const actif = (f === "tous" && !filtre) || f === filtre;
+        return (
+          <a
+            href={href}
+            aria-current={actif ? "page" : undefined}
+            class:list={[
+              "text-btn relative border-b-[1.5px] border-vert-clair pb-px text-center text-vert-fonce transition-opacity hover:opacity-100 lg:pb-2.75",
+              !actif && "lg:opacity-60",
+              i === 0 && "lg:pl-30.75 lg:text-left",
+              i === FILTRES.length - 1 && "lg:pr-35 lg:text-right",
+            ]}
+          >
+            {f}
+            {actif && (
+              <span
+                aria-hidden="true"
+                class="filtre-actif absolute inset-x-0 -bottom-[1.5px] h-[1.5px] bg-jaune"
+              />
+            )}
+          </a>
+        );
+      })}
+    </nav>
+
+    {projets.length === 0 && (
+      <p class="container-page text-b1 mt-10">Aucun projet pour le moment.</p>
+    )}
+
+    <!-- Mobile : cartes horizontales -->
+    <ul class="mt-4.75 flex flex-col items-center gap-3.25 px-7.25 lg:hidden">
+      {projets.map((p) => (
+        <li class="w-full max-w-88.25">
+          <ProjectCard projet={p} variante="horizontale" />
+        </li>
+      ))}
+    </ul>
+
+    <!-- Desktop : grille de cartes verticales -->
+    <ul class="mx-auto hidden max-w-282.75 grid-cols-4 gap-x-12.25 gap-y-15 pt-21.25 lg:grid">
+      {projets.map((p) => (
+        <li>
+          <ProjectCard projet={p} />
+        </li>
+      ))}
+    </ul>
+  </section>
+  <div class="h-9.5 lg:h-19.5"></div>
+</Layout>

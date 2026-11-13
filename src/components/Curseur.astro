@@ -1,0 +1,252 @@
+---
+// Curseur personnalisé : un point qui suit la souris exactement + un anneau qui le rattrape avec un léger retard.
+// - survol d'un lien / bouton : l'anneau grossit et se remplit de jaune
+// - clic : l'anneau se contracte puis une onde part du point cliqué
+// Activé seulement avec une vraie souris (pas sur tactile) et quand le JS tourne :
+// sinon le curseur natif reste en place. Dans la visionneuse de la galerie (<dialog> modal),
+// on rend la main au curseur natif (loupe / main pour zoomer et déplacer).
+---
+
+<div class="curseur" aria-hidden="true">
+  <div class="curseur-anneau"><span></span></div>
+  <div class="curseur-point"><span></span></div>
+</div>
+
+<style is:global>
+  html.curseur-actif,
+  html.curseur-actif * {
+    cursor: none !important;
+  }
+  /* Visionneuse ouverte : curseur natif */
+  html.curseur-actif:has(dialog:modal),
+  html.curseur-actif:has(dialog:modal) * {
+    cursor: revert !important;
+  }
+
+  .curseur {
+    display: none;
+  }
+  /* Couleur du curseur : marron foncé sur fond clair, marron clair sur fond foncé (classe posée en JS) */
+  .curseur,
+  .curseur-onde {
+    --curseur-couleur: var(--color-marron-fonce);
+  }
+  .curseur.sur-fonce,
+  .curseur-onde.sur-fonce {
+    --curseur-couleur: var(--color-marron-clair);
+  }
+
+  html.curseur-actif .curseur {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s;
+    /* Pas de fondu enchaîné avec le reste de la page pendant les transitions de page */
+    view-transition-name: curseur;
+  }
+  html.curseur-actif .curseur.visible {
+    opacity: 1;
+  }
+  html.curseur-actif:has(dialog:modal) .curseur {
+    opacity: 0;
+  }
+
+  .curseur-anneau,
+  .curseur-point {
+    position: absolute;
+    top: 0;
+    left: 0;
+    will-change: transform;
+  }
+  .curseur-anneau > span,
+  .curseur-point > span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    translate: -50% -50%;
+    border-radius: 9999px;
+  }
+
+  .curseur-anneau > span {
+    width: 34px;
+    height: 34px;
+    border: 1.5px solid var(--curseur-couleur);
+    background-color: transparent;
+    transition:
+      width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+      height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+      background-color 0.3s,
+      border-color 0.25s,
+      scale 0.15s;
+  }
+  .curseur-point > span {
+    width: 6px;
+    height: 6px;
+    background-color: var(--curseur-couleur);
+    transition:
+      scale 0.2s,
+      background-color 0.25s;
+  }
+
+  /* Survol d'un élément cliquable */
+  .curseur.survol .curseur-anneau > span {
+    width: 60px;
+    height: 60px;
+    background-color: color-mix(in srgb, var(--color-jaune) 45%, transparent);
+  }
+  .curseur.survol .curseur-point > span {
+    scale: 0;
+  }
+
+  /* Bouton de la souris enfoncé */
+  .curseur.appui .curseur-anneau > span {
+    scale: 0.75;
+  }
+
+  /* Onde au clic */
+  .curseur-onde {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9998;
+    width: 34px;
+    height: 34px;
+    border: 1.5px solid var(--curseur-couleur);
+    border-radius: 9999px;
+    pointer-events: none;
+    translate: -50% -50%;
+    animation: curseur-onde 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes curseur-onde {
+    to {
+      scale: 3;
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  const sourisFine = matchMedia("(hover: hover) and (pointer: fine)");
+  const mouvementReduit = matchMedia("(prefers-reduced-motion: reduce)");
+  const racine = document.querySelector<HTMLElement>(".curseur");
+
+  if (racine && sourisFine.matches) {
+    const anneau = racine.querySelector<HTMLElement>(".curseur-anneau")!;
+    const point = racine.querySelector<HTMLElement>(".curseur-point")!;
+    const CLIQUABLE = "a, button, [role='button'], label, summary, select";
+    const CLE = "curseur-position";
+
+    document.documentElement.classList.add("curseur-actif");
+
+    // On reprend la position de la page précédente pour que le curseur ne « saute » pas au changement de page.
+    let x = -100;
+    let y = -100;
+    try {
+      const sauvegarde = JSON.parse(sessionStorage.getItem(CLE) ?? "null");
+      if (sauvegarde) {
+        x = sauvegarde.x;
+        y = sauvegarde.y;
+        racine.classList.add("visible");
+      }
+    } catch {}
+    let ax = x;
+    let ay = y;
+
+    // --- Fond clair ou foncé sous le curseur ---
+    // Les couleurs calculées peuvent arriver en rgb(), oklab(), color-mix()… : on les fait passer
+    // par un canvas de 1 px pour toujours récupérer des valeurs R, V, B (avec un cache par chaîne).
+    const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+    const cacheCouleurs = new Map<string, [number, number, number, number]>();
+    const versRVBA = (couleur: string): [number, number, number, number] => {
+      const connu = cacheCouleurs.get(couleur);
+      if (connu) return connu;
+      let rvba: [number, number, number, number] = [0, 0, 0, 0];
+      if (ctx) {
+        ctx.clearRect(0, 0, 1, 1);
+        ctx.fillStyle = couleur;
+        ctx.fillRect(0, 0, 1, 1);
+        const [r, v, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+        rvba = [r, v, b, a / 255];
+      }
+      cacheCouleurs.set(couleur, rvba);
+      return rvba;
+    };
+    // Luminance relative (WCAG) : 0 = noir, 1 = blanc
+    const luminance = ([r, v, b]: number[]) => {
+      const lin = (c: number) => ((c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+      return 0.2126 * lin(r) + 0.7152 * lin(v) + 0.0722 * lin(b);
+    };
+    // Seuil entre les fonds clairs (beige, vert clair, marron clair ≈ 0,55-0,9)
+    // et les fonds foncés (vert foncé, marron foncé ≈ 0,07)
+    const SEUIL = 0.3;
+    const fondFonce = (px: number, py: number) => {
+      let el: Element | null = document.elementFromPoint(px, py);
+      while (el) {
+        const fond = versRVBA(getComputedStyle(el).backgroundColor);
+        if (fond[3] >= 0.5) return luminance(fond) < SEUIL;
+        el = el.parentElement;
+      }
+      return false; // fond de page : beige
+    };
+    const majCouleur = () => {
+      if (x < 0 || y < 0) return;
+      racine.classList.toggle("sur-fonce", fondFonce(x, y));
+    };
+
+    const placer = (el: HTMLElement, px: number, py: number) => {
+      el.style.transform = `translate3d(${px}px, ${py}px, 0)`;
+    };
+    placer(point, x, y);
+    placer(anneau, x, y);
+
+    addEventListener("pointermove", (e) => {
+      if (e.pointerType !== "mouse") return;
+      x = e.clientX;
+      y = e.clientY;
+      placer(point, x, y);
+      racine.classList.add("visible");
+      const cible = e.target instanceof Element ? e.target.closest(CLIQUABLE) : null;
+      racine.classList.toggle("survol", cible !== null);
+      majCouleur();
+    });
+
+    document.documentElement.addEventListener("mouseleave", () => racine.classList.remove("visible"));
+    document.documentElement.addEventListener("mouseenter", () => racine.classList.add("visible"));
+
+    addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "mouse") return;
+      racine.classList.add("appui");
+      if (mouvementReduit.matches) return;
+      const onde = document.createElement("span");
+      onde.className = racine.classList.contains("sur-fonce") ? "curseur-onde sur-fonce" : "curseur-onde";
+      onde.style.left = `${e.clientX}px`;
+      onde.style.top = `${e.clientY}px`;
+      onde.addEventListener("animationend", () => onde.remove());
+      document.body.append(onde);
+    });
+    addEventListener("pointerup", () => racine.classList.remove("appui"));
+
+    // L'anneau rattrape le point en douceur (directement si l'utilisateur a réduit les animations).
+    // On revérifie aussi la couleur régulièrement, sans bouger : défilement de la page,
+    // bouton qui passe au marron foncé au survol, etc.
+    let image = 0;
+    const boucle = () => {
+      if (++image % 6 === 0) majCouleur();
+      const k = mouvementReduit.matches ? 1 : 0.18;
+      ax += (x - ax) * k;
+      ay += (y - ay) * k;
+      placer(anneau, ax, ay);
+      requestAnimationFrame(boucle);
+    };
+    requestAnimationFrame(boucle);
+
+    addEventListener("pagehide", () => {
+      try {
+        sessionStorage.setItem(CLE, JSON.stringify({ x, y }));
+      } catch {}
+    });
+  }
+</script>

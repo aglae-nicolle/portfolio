@@ -1,0 +1,106 @@
+---
+import serpent from "../assets/logo/serpent.svg";
+import arobase from "../assets/icons/arobase-clair.svg";
+import telephone from "../assets/icons/telephone-clair.svg";
+import { SITE, PAGES, estActif } from "../lib/site";
+
+const chemin = Astro.url.pathname;
+const liens = [
+  ...PAGES,
+  { href: "/mentions-legales", label: "Mentions légales" },
+];
+---
+
+<footer class="bg-vert-fonce text-marron-clair">
+  <!-- Desktop : 3 colonnes (identité / contact / pages) -->
+  <div class="mx-auto hidden h-94.75 max-w-360 items-center justify-between px-26.75 lg:flex">
+    <div class="flex w-60.5 flex-col items-center">
+      <img
+        src={serpent.src}
+        alt=""
+        width="137"
+        height="136"
+        class="h-34 w-34.25"
+      />
+      <p class="mt-1 self-start text-[30px] leading-loose">Aglaé NICOLLE</p>
+      <p class="self-end text-sm-upper text-vert-clair">{SITE.metier}</p>
+    </div>
+
+    <div class="flex flex-col items-center">
+      <p class="text-[30px] leading-loose">Contactez moi !</p>
+      <p class="text-b1">
+        Je suis disponible sur <span class="text-jaune">Belfort</span> et{" "}
+        <span class="text-jaune">Montbéliard</span>
+      </p>
+      <ul class="text-btn mt-5 flex flex-col gap-3 text-vert-clair">
+        <li>
+          <a
+            href={`tel:${SITE.telephoneLien}`}
+            class="flex items-center gap-4.75 hover:text-jaune"
+          >
+            <img src={telephone.src} alt="" width="24" height="23" />
+            {SITE.telephone}
+          </a>
+        </li>
+        <li>
+          <a
+            href={`mailto:${SITE.email}`}
+            class="flex items-center gap-4.75 hover:text-jaune"
+          >
+            <img src={arobase.src} alt="" width="23" height="23" />
+            {SITE.email}
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <nav aria-label="Pages du site">
+      <p class="text-[30px] leading-loose">Pages</p>
+      <ul class="text-btn mt-1 flex flex-col pl-3 text-vert-clair">
+        {liens.map((p) => (
+          <li>
+            <a
+              href={p.href}
+              class="hover:text-jaune aria-[current=page]:text-jaune"
+              aria-current={estActif(p.href, chemin) ? "page" : undefined}
+            >
+              {p.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Mobile : contenu centré -->
+  <div class="flex flex-col items-center px-7 pb-16 pt-10 text-center lg:hidden">
+    <p class="text-b1">
+      Je suis disponible
+      <br />
+      sur <span class="text-jaune">Belfort</span> et{" "}
+      <span class="text-jaune">Montbéliard</span>
+    </p>
+    <ul class="text-btn mt-13.5 flex flex-col gap-1 text-vert-clair">
+      {liens.map((p) => (
+        <li>
+          <a
+            href={p.href}
+            aria-current={estActif(p.href, chemin) ? "page" : undefined}
+            class="aria-[current=page]:text-jaune"
+          >
+            {p.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <div class="mt-11.5 flex items-center gap-4">
+      <img src={serpent.src} alt="" width="47" height="47" class="size-11.75" />
+      <div class="text-left">
+        <p class="text-[18px] leading-loose">{SITE.nom}</p>
+        <p class="text-[10px] uppercase leading-[1.6] tracking-wider">
+          {SITE.metier}
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>

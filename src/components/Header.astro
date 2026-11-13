@@ -1,0 +1,141 @@
+---
+import logo from "../assets/logo/logo.svg";
+import serpent from "../assets/logo/serpent.svg";
+import iconeMenu from "../assets/icons/menu.svg";
+import iconeCroix from "../assets/icons/croix.svg";
+import { SITE, PAGES, estActif } from "../lib/site";
+
+const chemin = Astro.url.pathname;
+---
+
+<!-- Ombre en box-shadow (pas drop-shadow) : un `filter` piégerait le menu mobile `fixed` dans le header -->
+<header class="sticky top-0 z-40 bg-vert-fonce text-vert-clair shadow-[0_4px_10px_rgba(0,0,0,0.08)]">
+  <nav
+    class="flex h-18 items-center justify-between gap-4 px-6 lg:h-24.25 xl:pl-10.25 xl:pr-12.75"
+    aria-label="Navigation principale"
+  >
+    <!-- Entre 1024 et 1280 px, espacements resserrés pour que la mention tienne à côté du menu -->
+    <a href="/" class="flex items-center gap-3.75 lg:gap-4 xl:gap-6.5">
+      <img src={logo.src} alt="" width="48" height="48" class="size-12" />
+      <span class="text-h3 whitespace-nowrap">{`{ ${SITE.nom} }`}</span>
+      <span class="text-sm-upper hidden pt-1 whitespace-nowrap lg:inline">{SITE.metier}</span>
+    </a>
+
+    <!-- Menu desktop -->
+    <ul class="hidden items-center gap-8 lg:flex xl:gap-13">
+      {PAGES.map((p) => (
+        <li>
+          <a
+            href={p.href}
+            class="text-btn transition-colors hover:text-jaune aria-[current=page]:text-jaune"
+            aria-current={estActif(p.href, chemin) ? "page" : undefined}
+          >
+            {p.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- Bouton du menu mobile -->
+    <button
+      type="button"
+      class="lg:hidden"
+      id="menu-ouvrir"
+      aria-controls="menu-mobile"
+      aria-expanded="false"
+      aria-label="Ouvrir le menu"
+    >
+      <img src={iconeMenu.src} alt="" width="24" height="24" class="size-6" />
+    </button>
+  </nav>
+
+  <!-- Menu mobile plein écran (maquette « menu-mobile ») -->
+  <div
+    id="menu-mobile"
+    class="fixed inset-0 z-50 hidden flex-col bg-vert-fonce text-beige lg:hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Menu"
+  >
+    <div class="flex h-18 shrink-0 items-center justify-between px-6">
+      <a href="/" class="flex items-center gap-3.75 text-vert-clair">
+        <img src={logo.src} alt="" width="48" height="48" class="size-12" />
+        <span class="text-h3 whitespace-nowrap">{`{ ${SITE.nom} }`}</span>
+      </a>
+      <button type="button" id="menu-fermer" aria-label="Fermer le menu">
+        <img src={iconeCroix.src} alt="" width="13" height="14" />
+      </button>
+    </div>
+
+    <div class="flex flex-1 flex-col items-center justify-between overflow-y-auto pb-10 pt-27.5 text-center">
+      <ul class="flex flex-col gap-1.75 text-b1">
+        {PAGES.map((p) => (
+          <li>
+            <a
+              href={p.href}
+              aria-current={estActif(p.href, chemin) ? "page" : undefined}
+              class="aria-[current=page]:text-jaune"
+            >
+              {p.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <div class="mt-16">
+        <p class="text-h2 text-vert-clair">Me contacter</p>
+        <p class="text-b1 mt-5">
+          <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        </p>
+        <p class="text-b1 mt-1.75">
+          <a href={`tel:${SITE.telephoneLien}`}>{SITE.telephone}</a>
+        </p>
+      </div>
+
+      <a
+        href={SITE.cv}
+        download
+        class="btn mt-16 w-53.25 border-vert-fonce text-vert-fonce"
+      >
+        &lt; Télécharger mon CV &gt;
+      </a>
+
+      <div class="mt-16 flex items-center gap-4">
+        <img
+          src={serpent.src}
+          alt=""
+          width="47"
+          height="47"
+          class="size-11.75"
+        />
+        <div class="text-left text-marron-clair">
+          <p class="text-[18px] leading-loose">{SITE.nom}</p>
+          <p class="text-[10px] uppercase leading-[1.6] tracking-wider">
+            {SITE.metier}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  const menu = document.getElementById("menu-mobile");
+  const ouvrir = document.getElementById("menu-ouvrir");
+  const fermer = document.getElementById("menu-fermer");
+
+  function basculer(ouvert: boolean) {
+    menu?.classList.toggle("hidden", !ouvert);
+    menu?.classList.toggle("flex", ouvert);
+    ouvrir?.setAttribute("aria-expanded", String(ouvert));
+    document.body.style.overflow = ouvert ? "hidden" : "";
+    (ouvert ? fermer : ouvrir)?.focus();
+  }
+
+  ouvrir?.addEventListener("click", () => basculer(true));
+  fermer?.addEventListener("click", () => basculer(false));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !menu?.classList.contains("hidden"))
+      basculer(false);
+  });
+</script>

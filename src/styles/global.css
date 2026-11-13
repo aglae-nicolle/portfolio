@@ -1,0 +1,135 @@
+@import 'tailwindcss';
+
+/* Classes utilisées uniquement dans le HTML stocké en base (PROJET.contenuPageProjet,
+   descriptionProjet) : Tailwind ne lit pas la base, on les déclare ici pour qu'elles soient générées. */
+@source inline("grid grid-cols-1 grid-cols-2 lg:grid-cols-2 gap-8");
+
+/* Police des titres (fichier fourni dans public/fonts) */
+@font-face {
+  font-family: 'Kingred';
+  src: url('/fonts/kingred.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Tokens issus de la maquette Figma (Guide de style) */
+@theme {
+  --color-beige: #fff1df;
+  --color-beige-20: #d2c8bb;
+  --color-beige-40: #a8a097;
+  --color-beige-60: #817b74;
+  --color-beige-80: #58534e;
+  --color-noir: #000000;
+  --color-marron-clair: #dbc7b0;
+  --color-marron-fonce: #6f4230;
+  --color-vert-clair: #dad09e;
+  --color-vert-fonce: #445333;
+  --color-jaune: #ffbb5c;
+  --color-rouge: #dd1515;
+  --color-vert: #077f34;
+
+  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-title: 'Kingred', 'Manrope', serif;
+  --font-mulish: 'Mulish', 'Manrope', sans-serif;
+}
+
+@layer base {
+  html { background-color: var(--color-beige); color: var(--color-vert-fonce); }
+  /* Défilement en douceur vers les ancres (sommaire des pages projet), sauf si les animations sont réduites */
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+  body { font-family: var(--font-body); font-size: 16px; line-height: 1.3; }
+  h1, h2 { font-family: var(--font-title); font-weight: 400; line-height: 1.1; color: var(--color-marron-fonce); }
+}
+
+/* Styles de texte du guide de style (mobile → desktop à partir de lg) */
+@utility text-h1 { font-family: var(--font-title); font-size: 36px; line-height: 1.1; @media (min-width: 1024px) { font-size: 70px; } }
+@utility text-h2 { font-family: var(--font-title); font-size: 24px; line-height: 1.1; @media (min-width: 1024px) { font-size: 50px; } }
+@utility text-h3 { font-size: 18px; line-height: 2; @media (min-width: 1024px) { font-size: 30px; } }
+@utility text-b1 { font-size: 18px; line-height: 1.2; @media (min-width: 1024px) { font-size: 20px; } }
+@utility text-b2 { font-size: 16px; line-height: 1.3; }
+@utility text-sm-upper { font-size: 10px; line-height: 1.6; letter-spacing: 0.05em; text-transform: uppercase; @media (min-width: 1024px) { font-size: 14px; } }
+@utility text-btn {
+  font-size: 10px; line-height: 1.7; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase;
+  @media (min-width: 1024px) { font-size: 16px; line-height: 1.8; }
+}
+
+@layer components {
+  /* Bouton « <Texte> » de la maquette */
+  .btn {
+    @apply text-btn inline-flex h-10 items-center justify-center rounded-[5px] border-[1.5px] border-marron-fonce
+      bg-jaune px-6 text-center text-marron-fonce transition-colors hover:bg-marron-fonce hover:text-beige
+      lg:h-13 lg:px-8;
+  }
+  .container-page { @apply mx-auto w-full max-w-360 px-6 lg:px-30; }
+
+  /* Fond en damier (sections « boîte à outils » et page 404) */
+  .damier {
+    --case: 30px;
+    --couleur-case: var(--color-marron-clair);
+    background-color: var(--color-beige);
+    background-image: repeating-conic-gradient(var(--couleur-case) 0 25%, transparent 0 50%);
+    background-size: calc(var(--case) * 2) calc(var(--case) * 2);
+  }
+  @media (min-width: 1024px) { .damier { --case: 50px; } }
+
+  /* Liens du sommaire (page projet) : soulignés en jaune au repos pour montrer qu'ils sont cliquables,
+     puis surlignage jaune qui se remplit de gauche à droite au survol / au focus clavier. */
+  .lien-sommaire {
+    text-decoration: underline 1.5px var(--color-jaune);
+    text-underline-offset: 4px;
+    background-image: linear-gradient(var(--color-jaune), var(--color-jaune));
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 0% 100%;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    transition: background-size 0.35s cubic-bezier(0.65, 0, 0.35, 1), color 0.2s;
+  }
+  .lien-sommaire:hover,
+  .lien-sommaire:focus-visible {
+    background-size: 100% 100%;
+    color: var(--color-marron-fonce);
+    outline: none;
+  }
+
+  .prose-projet h2 { @apply text-h2 mb-6 scroll-mt-22.5 lg:mb-9 lg:scroll-mt-27.5; }
+  .prose-projet p { @apply text-b2 mb-4; }
+}
+
+/* HTML venant de la base. Hors @layer pour passer devant les utilitaires Tailwind. */
+.text-semibold { font-weight: 700; color: var(--color-marron-fonce); }
+.carte-projet .text-semibold { font-weight: inherit; color: inherit; }
+.prose-projet .grid { column-gap: 5rem; row-gap: 3rem; }
+@media (max-width: 1023px) {
+  .prose-projet .grid-cols-2 { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Transitions entre pages (View Transitions natives, sans routeur JS).
+   L'image et le titre d'une carte projet « voyagent » jusqu'à l'en-tête de la page projet
+   grâce aux view-transition-name posés dans ProjectCard.astro et projets/[id].astro.
+   Navigateurs non compatibles (Firefox) : navigation classique, sans erreur. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+
+  ::view-transition-group(*) {
+    animation-duration: 0.55s;
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation-duration: 0.3s; }
+
+  /* Filtres de /projets : le trait jaune glisse d'un onglet à l'autre.
+     La barre entière (onglets + trait vert) a aussi son propre groupe, animé avec la même
+     durée et la même courbe : si la page a défilé, la nouvelle page s'ouvre en haut et les
+     deux traits se déplacent ensemble, sans que le jaune se décolle du vert. */
+  .filtres { view-transition-name: filtres; }
+  .filtre-actif { view-transition-name: filtre-actif; }
+  ::view-transition-group(filtres),
+  ::view-transition-group(filtre-actif) {
+    animation-duration: 0.45s;
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+}

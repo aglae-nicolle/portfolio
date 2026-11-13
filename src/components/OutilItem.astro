@@ -1,0 +1,28 @@
+---
+// Ligne « icône + nom » des listes d'outils (boîte à outils de l'accueil, outils d'un projet)
+import OutilIcon from "./OutilIcon.astro";
+import type { Outil } from "../lib/db";
+
+interface Props {
+  outil: Outil;
+  taille?: "normale" | "grande";
+}
+const { outil, taille = "normale" } = Astro.props;
+---
+
+<li
+  class:list={[
+    "flex items-center break-inside-avoid",
+    taille === "grande" ? "gap-6 lg:gap-12" : "gap-2.5 lg:gap-9",
+  ]}
+>
+  <span
+    class:list={[
+      "flex shrink-0 items-center justify-center",
+      taille === "grande" ? "size-8 lg:size-14.25" : "size-6 lg:size-8",
+    ]}
+  >
+    <OutilIcon icon={outil.iconOutils} class="size-full" />
+  </span>
+  <span class="text-b1 min-w-0">{outil.nomOutils.trim()}</span>
+</li>

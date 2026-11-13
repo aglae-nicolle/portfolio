@@ -1,0 +1,65 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { SITE } from "../lib/site";
+---
+
+<Layout title="Mentions légales">
+  <section class="container-page pb-16 pt-9.25 lg:pb-42.75 lg:pt-20">
+    <h1 class="text-h1">Mentions légales</h1>
+
+    <div class="mt-6.5 grid gap-y-8 text-[14px] leading-[1.3] lg:mt-22 lg:grid-cols-[628px_368px] lg:gap-y-22 lg:text-b2 lg:leading-normal [&_h2]:text-h2 [&_h2]:mb-3 lg:[&_h2]:mb-10.25 [&_strong]:font-bold [&_strong]:text-marron-fonce">
+      <div class="lg:max-w-92">
+        <h2>Editeur du site</h2>
+        <p>
+          Le site est édité par <strong>Aglaé Nicolle</strong>.<br />
+          Née le 25/02/2007.
+          <br />
+          Ce site est un portfolio personnel à caractère non commercial.
+        </p>
+        <p class="mt-[1.2em]">
+          <strong>Adresse :</strong>
+          <br />4 place Tharradin BP 71427
+          <br />
+          25211 Montbéliard cedex
+        </p>
+        <p class="mt-[1.2em]">
+          <strong>Email :</strong>{" "}
+          <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+          <br />
+          <strong>Téléphone :</strong> +33 6 95 98 71 51
+        </p>
+      </div>
+
+      <div>
+        <h2>Hébergement</h2>
+        <p>
+          Ce site est hébergé par la société <strong>Netlify Inc.</strong>
+        </p>
+        <p class="mt-[1.2em]">
+          <strong>Adresse de l'hébergeur :</strong>
+          <br />
+          2325 3rd Street Suite 296
+          <br />
+          San Francisco, CA 94107
+        </p>
+        <p class="mt-[1.2em]">
+          <strong>Contact :</strong> +1 415 800-5387
+        </p>
+      </div>
+
+      <div class="lg:max-w-92">
+        <h2>Données &amp; Cookies</h2>
+        <p>
+          Le responsable du traitement des données personnelles collectées via
+          le formulaire ou de manière automatique est{" "}
+          <strong>Aglaé Nicolle</strong>.
+        </p>
+        <p class="mt-[1.2em]">
+          Aucun cookie publicitaire n'est déposé. Seules des mesures
+          statistiques basiques et anonymes de fréquentation peuvent être
+          opérées par l'hébergeur Netlify.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

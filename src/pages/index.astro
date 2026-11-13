@@ -1,0 +1,125 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Carousel from "../components/Carousel.astro";
+import OutilItem from "../components/OutilItem.astro";
+import { getProjets, getOutilsParType } from "../lib/db";
+import { SITE } from "../lib/site";
+import { Image } from "astro:assets";
+import pdp from "../assets/image/paquerette.webp";
+
+const projets = getProjets().slice(0, 6);
+const { logiciels, langages } = getOutilsParType();
+---
+
+<Layout title="Accueil">
+  <!-- Hero -->
+  <section class="mx-auto flex max-w-360 flex-col items-center px-7 pt-17.25 lg:px-30 lg:pt-18.25">
+    <div class="flex w-full items-center justify-between gap-6 lg:w-auto lg:justify-center lg:gap-18">
+      <Image
+        src={pdp}
+        alt="Image d'une paquerette avec un visage qui souri"
+        loading="eager"
+        class="size-36.75 shrink-0 rounded-[15px] object-cover object-[50%_60%] lg:mt-28.25 lg:size-101 lg:rounded-[40px]"
+      />
+      <div class="flex flex-col items-end text-right lg:w-128.75 lg:items-start lg:text-left">
+        <h1 class="text-h1">
+          Aglaé
+          <br />
+          <span class="pl-[0.6em]">Nicolle</span>
+        </h1>
+        <p class="text-b1 mt-4.5 text-vert-fonce lg:text-h3 lg:mt-17.25 lg:self-center">
+          Étudiante en 2e année de IUT MMI
+        </p>
+        <p class="mt-4.5 text-[16px] leading-[1.4] lg:text-b1 lg:mt-8 lg:ml-6">
+          <a href={`mailto:${SITE.email}`} class="hover:text-marron-fonce">
+            {SITE.email}
+          </a>
+          <br />
+          <a href={`tel:${SITE.telephoneLien}`} class="hover:text-marron-fonce">
+            {SITE.telephone}
+          </a>
+        </p>
+        <a
+          href={SITE.cv}
+          download
+          class="btn mt-27 hidden lg:ml-6 lg:inline-flex lg:w-86"
+        >
+          &lt;Télécharger mon CV&gt;
+        </a>
+      </div>
+    </div>
+    <a href={SITE.cv} download class="btn mt-13.75 w-53.25 lg:hidden">
+      &lt;Télécharger mon CV&gt;
+    </a>
+  </section>
+
+  <!-- Projets -->
+  <section class="mx-auto mt-9.25 max-w-360 lg:mt-37.75 lg:px-31.5">
+    <h2 class="text-h2 px-6.5 lg:px-0">Mes derniers projets</h2>
+    <div class="mt-2.5 lg:mt-6">
+      <Carousel projets={projets} />
+    </div>
+    <div class="mt-10 flex justify-center px-6 lg:mt-17">
+      <a href="/projets" class="btn w-70 lg:w-108">
+        &lt;En savoir plus sur mes projets&gt;
+      </a>
+    </div>
+  </section>
+
+  <!-- Boîte à outils (cadre en damier) -->
+  <section class="damier mt-12.5 py-22.5 lg:mt-26.25 lg:px-25 lg:py-37.5">
+    <!-- Les largeurs de la maquette (colonne logiciels de 575px, marges de 112px) ne s'appliquent qu'à partir de 1440px :
+         en dessous, les colonnes se partagent la place pour que les noms (ex : TailwindCSS) ne sortent pas du cadre. -->
+    <div class="mx-auto max-w-325 bg-beige px-6 py-9 sm:px-11 lg:px-16 lg:py-15 min-[1440px]:px-28">
+      <h2 class="text-h2">
+        <span class="lg:hidden">Mes outils</span>
+        <span class="hidden lg:inline">Ma boîte à outils</span>
+      </h2>
+      <div class="mt-4 flex flex-col gap-10 lg:mt-6 xl:flex-row min-[1440px]:gap-0">
+        <div class="min-w-0 xl:flex-1 min-[1440px]:w-143.75 min-[1440px]:flex-none">
+          <h3 class="text-h3 text-marron-fonce">Les logiciels</h3>
+          <ul class="mt-2 columns-1 gap-x-4 min-[360px]:columns-2 lg:mt-3 lg:gap-x-6 [&>li]:mb-3.25 lg:[&>li]:mb-5.75">
+            {logiciels.map((o) => (
+              <OutilItem outil={o} />
+            ))}
+          </ul>
+        </div>
+        <div class="min-w-0 xl:flex-1">
+          <h3 class="text-h3 text-marron-fonce">Les langages</h3>
+          <ul class="mt-2 columns-1 gap-x-4 min-[360px]:columns-2 lg:mt-3 lg:gap-x-6 [&>li]:mb-3.25 lg:[&>li]:mb-5.75">
+            {langages.map((o) => (
+              <OutilItem outil={o} />
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Qui je suis -->
+  <section class="bg-vert-clair py-20 lg:py-29.75">
+    <div class="container-page lg:px-32">
+      <h2 class="text-h2">Qui je suis</h2>
+      <div class="text-b2 mt-6 space-y-[1.3em] text-vert-fonce lg:mt-13.25">
+        <p>
+          Je suis Aglaé, une étudiante de 19 ans passionnée d'informatique.
+          Actuellement, j'étudie à l'IUT MMI (Métiers du Multimédia et de
+          l'Internet) de Montbéliard en 2e année en filière de développement.
+        </p>
+        <p>
+          J'ai découvert le domaine du développement au travers d'un stage où
+          j'ai été initiée aux langages HTML et CSS. Après avoir appris de
+          nombreux autres langages (Python, SQL, Bash, C, Arduino, php et
+          javascript) je me suis rendue compte que, bien que j'aime découvrir de
+          nouveaux langages et que tous me passionnent, le développement web est
+          le domaine dans lequel je m'épanouis le plus.
+        </p>
+      </div>
+      <div class="mt-9 flex justify-start lg:mt-9.5 lg:justify-center">
+        <a href="/a-propos" class="btn w-55.25 lg:w-84.25">
+          &lt;En savoir plus sur moi&gt;
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

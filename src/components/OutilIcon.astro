@@ -1,0 +1,13 @@
+---
+// Icône d'un outil : code SVG stocké en base (affiché inline) ou chemin vers un fichier.
+// L'icône remplit la boîte donnée par `class` en gardant ses proportions
+// (comme dans la maquette : MySQL et php, plus larges que hauts, sont réduits pour tenir).
+import { getInlineSvg } from '../js/backend.ts';
+
+interface Props { icon: string | null; class?: string }
+const { icon, class: className = 'size-8' } = Astro.props;
+const svg = getInlineSvg(icon);
+---
+{svg
+  ? <span class:list={['inline-flex items-center justify-center [&>svg]:size-full', className]} aria-hidden="true" set:html={svg} />
+  : icon && <img src={icon} alt="" class:list={['object-contain', className]} />}

@@ -1,0 +1,335 @@
+---
+interface Props {
+  images: { src: string; alt: string }[];
+  titre?: string;
+}
+const { images, titre = "Galerie" } = Astro.props;
+const plusieurs = images.length > 1;
+---
+
+<!-- Galerie d'un projet en colonnes façon Pinterest (« masonry ») :
+     chaque image prend la largeur de sa colonne et garde ses proportions.
+     Au survol, le texte alternatif recouvre toute l'image (et défile s'il est trop long).
+     Au clic, l'image s'ouvre en grand (visionneuse) avec son texte alternatif dessous et peut être zoomée. -->
+<section class="galerie mt-12 lg:mt-20" aria-label={titre}>
+  <ul class="columns-2 gap-4 sm:columns-3 lg:columns-4 lg:gap-6">
+    {images.map((image, i) => (
+      <li class="mb-4 break-inside-avoid lg:mb-6">
+        <button
+          type="button"
+          data-index={i}
+          aria-label={`Agrandir l'image : ${image.alt}`}
+          class="galerie-vignette group relative block w-full cursor-zoom-in overflow-hidden rounded-[15px] border-[1.5px] border-marron-fonce bg-marron-clair text-left outline-none focus-visible:ring-2 focus-visible:ring-jaune lg:rounded-[25px]"
+        >
+          <img
+            src={image.src}
+            alt={image.alt}
+            class="block h-auto w-full transition-transform duration-500 group-hover:scale-105 group-focus-visible:scale-105"
+            loading={i < 4 ? "eager" : "lazy"}
+            decoding="async"
+          />
+          <!-- Le texte recouvre toute l'image ; s'il est trop long, il défile dans le cadre (molette / pavé tactile).
+               my-auto le centre verticalement quand il est court, sans le couper quand il déborde. -->
+          <span
+            aria-hidden="true"
+            class="legende-vignette absolute inset-0 flex translate-y-full flex-col overflow-y-auto overscroll-contain bg-marron-fonce/85 px-4 py-3 text-[12px] leading-[1.3] text-beige opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 lg:px-5 lg:py-4 lg:text-b2"
+          >
+            <span class="my-auto">{image.alt}</span>
+          </span>
+        </button>
+      </li>
+    ))}
+  </ul>
+
+  <!-- Visionneuse plein écran -->
+  <dialog
+    class="galerie-visionneuse m-0 h-dvh max-h-none w-screen max-w-none bg-transparent p-0 text-beige backdrop:bg-marron-fonce/70"
+    aria-label="Image agrandie"
+  >
+    <div class="flex h-full flex-col">
+      <!-- Barre d'outils -->
+      <div class="flex shrink-0 items-center justify-between gap-2 px-4 py-3 lg:px-8 lg:py-5">
+        <p class="v-compteur text-btn" aria-live="polite"></p>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            class="v-btn v-zoom-moins"
+            aria-label="Dézoomer"
+          >
+            −
+          </button>
+          <button
+            type="button"
+            class="v-btn v-zoom-reset min-w-16 text-[14px]"
+            aria-label="Réinitialiser le zoom"
+          >
+            100&nbsp;%
+          </button>
+          <button type="button" class="v-btn v-zoom-plus" aria-label="Zoomer">
+            +
+          </button>
+          <button type="button" class="v-btn v-fermer ml-2" aria-label="Fermer">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Zone de l'image (zoom à la molette, au double-clic, au pincement ; déplacement au glisser) -->
+      <div class="v-scene relative min-h-0 flex-1 touch-none overflow-hidden select-none">
+        <img
+          class="v-image absolute inset-0 m-auto max-h-full max-w-full cursor-zoom-in object-contain will-change-transform"
+          src=""
+          alt=""
+          draggable="false"
+        />
+        {plusieurs && (
+          <>
+            <button
+              type="button"
+              class="v-btn v-nav v-prec absolute top-1/2 left-3 -translate-y-1/2 lg:left-8"
+              aria-label="Image précédente"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              class="v-btn v-nav v-suiv absolute top-1/2 right-3 -translate-y-1/2 lg:right-8"
+              aria-label="Image suivante"
+            >
+              ›
+            </button>
+          </>
+        )}
+      </div>
+
+      <!-- Texte alternatif sous l'image -->
+      <p class="v-legende mx-auto w-full max-w-200 shrink-0 px-6 py-4 text-center text-[14px] leading-[1.4] lg:py-6 lg:text-b1"></p>
+    </div>
+  </dialog>
+
+  <script
+    type="application/json"
+    class="galerie-donnees"
+    set:html={JSON.stringify(images.map((i) => i.alt)).replace(/</g, "\\u003c")}
+  />
+</section>
+
+<style>
+  .v-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    height: 2.75rem;
+    padding: 0 0.75rem;
+    border: 1.5px solid var(--color-beige);
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.4);
+    color: var(--color-beige);
+    font-size: 1.25rem;
+    line-height: 1;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+  }
+  .v-btn:hover,
+  .v-btn:focus-visible {
+    background: var(--color-jaune);
+    color: var(--color-marron-fonce);
+    outline: none;
+  }
+  .v-nav {
+    font-size: 2rem;
+    z-index: 1;
+  }
+  /* Barre de défilement discrète, beige, pour les textes longs sur les vignettes */
+  .legende-vignette {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-beige) transparent;
+  }
+  .v-image.zoome {
+    cursor: grab;
+  }
+  .v-image.deplacement {
+    cursor: grabbing;
+  }
+</style>
+
+<script>
+  const ZOOM_MIN = 1;
+  const ZOOM_MAX = 5;
+
+  document.querySelectorAll<HTMLElement>(".galerie").forEach((galerie) => {
+    const dialog = galerie.querySelector<HTMLDialogElement>(
+      ".galerie-visionneuse",
+    )!;
+    const scene = dialog.querySelector<HTMLElement>(".v-scene")!;
+    const img = dialog.querySelector<HTMLImageElement>(".v-image")!;
+    const legende = dialog.querySelector<HTMLElement>(".v-legende")!;
+    const compteur = dialog.querySelector<HTMLElement>(".v-compteur")!;
+    const resetBtn = dialog.querySelector<HTMLButtonElement>(".v-zoom-reset")!;
+    const vignettes = [
+      ...galerie.querySelectorAll<HTMLButtonElement>(".galerie-vignette"),
+    ];
+    const sources = vignettes.map((v) => v.querySelector("img")!.src);
+    const alts: string[] = JSON.parse(
+      galerie.querySelector(".galerie-donnees")?.textContent ?? "[]",
+    );
+
+    let index = 0;
+    let echelle = 1;
+    let x = 0;
+    let y = 0;
+
+    // ---------- Zoom / déplacement ----------
+    const appliquer = () => {
+      // On empêche l'image de sortir complètement de l'écran.
+      const limX = (img.offsetWidth * (echelle - 1)) / 2;
+      const limY = (img.offsetHeight * (echelle - 1)) / 2;
+      x = Math.max(-limX, Math.min(limX, x));
+      y = Math.max(-limY, Math.min(limY, y));
+      img.style.transform = `translate(${x}px, ${y}px) scale(${echelle})`;
+      img.classList.toggle("zoome", echelle > 1);
+      resetBtn.textContent = `${Math.round(echelle * 100)} %`;
+    };
+
+    /** Zoome vers le point (cx, cy) de l'écran, pour que ce point reste sous le curseur / les doigts. */
+    const zoomer = (nouvelle: number, cx?: number, cy?: number) => {
+      nouvelle = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, nouvelle));
+      const r = scene.getBoundingClientRect();
+      const px = (cx ?? r.left + r.width / 2) - (r.left + r.width / 2);
+      const py = (cy ?? r.top + r.height / 2) - (r.top + r.height / 2);
+      const ratio = nouvelle / echelle;
+      x = px - (px - x) * ratio;
+      y = py - (py - y) * ratio;
+      echelle = nouvelle;
+      if (echelle === 1) x = y = 0;
+      appliquer();
+    };
+
+    const reinitialiser = () => {
+      echelle = 1;
+      x = y = 0;
+      appliquer();
+    };
+
+    // ---------- Ouverture / navigation ----------
+    const afficher = (i: number) => {
+      index = (i + sources.length) % sources.length;
+      img.src = sources[index];
+      img.alt = alts[index] ?? "";
+      legende.textContent = alts[index] ?? "";
+      compteur.textContent =
+        sources.length > 1 ? `${index + 1} / ${sources.length}` : "";
+      reinitialiser();
+    };
+
+    vignettes.forEach((v) =>
+      v.addEventListener("click", () => {
+        afficher(Number(v.dataset.index));
+        dialog.showModal();
+        document.documentElement.style.overflow = "hidden";
+      }),
+    );
+    dialog.addEventListener("close", () => {
+      document.documentElement.style.overflow = "";
+      vignettes[index]?.focus();
+    });
+
+    dialog
+      .querySelector(".v-fermer")!
+      .addEventListener("click", () => dialog.close());
+    dialog
+      .querySelector(".v-prec")
+      ?.addEventListener("click", () => afficher(index - 1));
+    dialog
+      .querySelector(".v-suiv")
+      ?.addEventListener("click", () => afficher(index + 1));
+    dialog
+      .querySelector(".v-zoom-plus")!
+      .addEventListener("click", () => zoomer(echelle * 1.5));
+    dialog
+      .querySelector(".v-zoom-moins")!
+      .addEventListener("click", () => zoomer(echelle / 1.5));
+    resetBtn.addEventListener("click", reinitialiser);
+
+    // Clic sur le fond (hors image) = fermer.
+    scene.addEventListener("click", (e) => {
+      if (e.target === scene && echelle === 1) dialog.close();
+    });
+
+    dialog.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" && sources.length > 1) afficher(index - 1);
+      else if (e.key === "ArrowRight" && sources.length > 1)
+        afficher(index + 1);
+      else if (e.key === "+" || e.key === "=") zoomer(echelle * 1.5);
+      else if (e.key === "-") zoomer(echelle / 1.5);
+      else if (e.key === "0") reinitialiser();
+    });
+
+    // Molette (ou pincement sur trackpad).
+    scene.addEventListener(
+      "wheel",
+      (e) => {
+        e.preventDefault();
+        zoomer(echelle * Math.exp(-e.deltaY * 0.002), e.clientX, e.clientY);
+      },
+      { passive: false },
+    );
+
+    // Double-clic / double-tap : zoom ×2,5 sur le point visé, ou retour à 100 %.
+    img.addEventListener("dblclick", (e) => {
+      if (echelle > 1) reinitialiser();
+      else zoomer(2.5, e.clientX, e.clientY);
+    });
+
+    // Glisser pour se déplacer, pincer à deux doigts pour zoomer.
+    const pointeurs = new Map<number, { x: number; y: number }>();
+    let distanceDepart = 0;
+    let echelleDepart = 1;
+
+    const distance = () => {
+      const [a, b] = [...pointeurs.values()];
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    };
+
+    img.addEventListener("pointerdown", (e) => {
+      img.setPointerCapture(e.pointerId);
+      pointeurs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointeurs.size === 2) {
+        distanceDepart = distance();
+        echelleDepart = echelle;
+      }
+      if (echelle > 1) img.classList.add("deplacement");
+    });
+
+    img.addEventListener("pointermove", (e) => {
+      const avant = pointeurs.get(e.pointerId);
+      if (!avant) return;
+      pointeurs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (pointeurs.size === 2) {
+        const [a, b] = [...pointeurs.values()];
+        zoomer(
+          echelleDepart * (distance() / distanceDepart),
+          (a.x + b.x) / 2,
+          (a.y + b.y) / 2,
+        );
+      } else if (echelle > 1) {
+        x += e.clientX - avant.x;
+        y += e.clientY - avant.y;
+        appliquer();
+      }
+    });
+
+    const relacher = (e: PointerEvent) => {
+      pointeurs.delete(e.pointerId);
+      if (pointeurs.size < 2) distanceDepart = 0;
+      if (pointeurs.size === 0) img.classList.remove("deplacement");
+    };
+    img.addEventListener("pointerup", relacher);
+    img.addEventListener("pointercancel", relacher);
+
+    window.addEventListener("resize", () => dialog.open && appliquer());
+  });
+</script>

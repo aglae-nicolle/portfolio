@@ -1,0 +1,68 @@
+---
+import type { Projet } from "../lib/db";
+import ProjectCard from "./ProjectCard.astro";
+import fleche from "../assets/icons/fleche.svg";
+
+interface Props {
+  projets: (Projet & { ecoles?: string })[];
+}
+const { projets } = Astro.props;
+---
+
+<!-- Carrousel : défilement horizontal natif (snap) + flèches de la maquette -->
+<div class="relative">
+  <ul
+    id="carousel"
+    class="flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-6 py-5 scrollbar-none lg:px-0 [&::-webkit-scrollbar]:hidden"
+  >
+    {projets.map((p) => (
+      <li class="snap-start">
+        <ProjectCard projet={p} />
+      </li>
+    ))}
+  </ul>
+  <div class="mt-2 flex justify-center gap-28.75">
+    <button
+      type="button"
+      data-dir="-1"
+      class="carousel-btn p-2 transition-opacity hover:opacity-70"
+      aria-label="Projets précédents"
+    >
+      <img
+        src={fleche.src}
+        alt=""
+        width="71"
+        height="29"
+        class="h-7.25 w-17.75 rotate-180"
+      />
+    </button>
+    <button
+      type="button"
+      data-dir="1"
+      class="carousel-btn p-2 transition-opacity hover:opacity-70"
+      aria-label="Projets suivants"
+    >
+      <img
+        src={fleche.src}
+        alt=""
+        width="71"
+        height="29"
+        class="h-7.25 w-17.75"
+      />
+    </button>
+  </div>
+</div>
+
+<script>
+  const track = document.getElementById("carousel");
+  document
+    .querySelectorAll<HTMLButtonElement>(".carousel-btn")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => {
+        track?.scrollBy({
+          left: Number(btn.dataset.dir) * 266,
+          behavior: "smooth",
+        });
+      });
+    });
+</script>

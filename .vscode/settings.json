@@ -1,0 +1,8 @@
+{
+  // Les fichiers CSS utilisent la syntaxe de Tailwind v4 (@theme, @source, @utility, @apply) :
+  // on les fait analyser par l'extension Tailwind CSS IntelliSense plutôt que par le validateur CSS standard,
+  // qui signale ces directives comme « Unknown at rule ».
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
+}

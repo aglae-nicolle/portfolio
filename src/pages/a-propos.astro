@@ -1,0 +1,76 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { Image } from "astro:assets";
+import pdp from "../assets/image/paquerette.webp";
+import { SITE } from "../lib/site";
+---
+
+<Layout title="À propos">
+  <section class="container-page pt-9.25 lg:pt-20">
+    <h1 class="text-h1">À propos</h1>
+
+    <div class="mt-6.5 grid grid-cols-[144px_1fr] gap-x-6 lg:mt-13.75 lg:grid-cols-[413px_1fr] lg:gap-x-14.75">
+      <Image
+        src={pdp}
+        alt="Image d'une paquerette avec un visage qui sourit"
+        class="size-36 rounded-[15px] object-cover object-bottom lg:row-span-2 lg:size-103.25 lg:rounded-[40px]"
+      />
+      <p class="text-[14px] leading-tight lg:text-b1 lg:mt-8.75 lg:max-w-167">
+        Je m'appelle <span class="text-marron-fonce">Aglaé Nicolle</span>, je
+        suis actuellement étudiante dans la{" "}
+        <span class="text-marron-fonce">filière développement</span> de l’
+        <span class="text-marron-fonce">IUT MMI</span> (Métiers du Multimédia et
+        de l'Internet) de Montbéliard en{" "}
+        <span class="text-marron-fonce">2e année</span>.
+      </p>
+      <div class="col-span-2 mt-8 flex flex-col items-center lg:col-span-1 lg:col-start-2 lg:mt-9.75 lg:max-w-167">
+        <p class="text-[16px] leading-tight lg:text-b1">
+          Bien que je sois passionnée de développement informatique, il m’est à
+          cœur de ne pas nuire à la planète. Pour moi, l'IA est juste un outil,
+          et rien ne remplace vraiment le savoir-faire humain. Je choisis donc
+          mes technologies en regardant bien leur impact écologique et la
+          manière dont elles traitent les données. L'idée est de coder tout en
+          prenant soin de l'environnement.
+        </p>
+        <a
+          href={SITE.cv}
+          download
+          class="btn mt-14.5 w-53.25 lg:mt-14.75 lg:w-86"
+        >
+          &lt;Télécharger mon CV&gt;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Parcours (bande pleine largeur en mobile, encadré arrondi en desktop) -->
+  <section class="mt-17.75 bg-vert-clair px-9.5 py-20 lg:mx-auto lg:mb-11.5 lg:mt-10.5 lg:max-w-310 lg:rounded-[20px] lg:px-10 lg:pb-18 lg:pt-15.5">
+    <h2 class="text-h2">Mon parcours académique</h2>
+    <div class="mt-6 space-y-[1.2em] text-[16px] leading-tight lg:mt-9 lg:max-w-276 lg:text-b1">
+      <p>
+        En 2020, j’ai découvert le monde de l’informatique grâce à un stage
+        intitulé Girls’R Coding, organisé par l’iBP. Cet événement avait pour
+        objectif d’initier vingt jeunes filles aux langages HTML et CSS. J’ai
+        ainsi pu manipuler du code pour la première fois, et cette expérience a
+        été une véritable révélation pour moi.
+      </p>
+      <p>
+        En terminale, j’ai choisi les spécialités Mathématiques et NSI
+        (Numérique et Sciences Informatiques), au cours desquelles j’ai appris à
+        utiliser les langages Python, SQL, HTML, CSS et JavaScript.
+      </p>
+      <p>
+        À l’issue du lycée, j’ai intégré l’UTBM, école d’ingénieurs à Belfort.
+        Cette formation m’a permis d’approfondir mes connaissances en
+        informatique et de découvrir de nouveaux langages tels que le C, Arduino
+        ainsi que l’environnement Linux.
+      </p>
+      <p>
+        Après un an et demi, je me suis redirigée vers l'IUT dont la formation
+        s'est révélée plus proche de mes passions "développement / créativité".
+        Je ne regrette pas cette réorientation car je m'épanouis dans tous les
+        projets que je mène.
+      </p>
+    </div>
+  </section>
+</Layout>
