@@ -1,0 +1,58 @@
+name: Déployer sur le VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-portfolio
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Installer et compiler
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+          tar -czf dist.tgz dist
+
+      - name: Préparer la clé SSH
+        env:
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Envoyer et déployer
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PORT: ${{ secrets.VPS_SSH_PORT }}
+        run: |
+          scp -P "$VPS_PORT" dist.tgz "$VPS_USER@$VPS_HOST:/tmp/portfolio-dist.tgz"
+          ssh -p "$VPS_PORT" -o BatchMode=yes "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          export PATH="/usr/local/bin:$PATH"
+          cd /var/www/portfolio/app
+          git fetch --prune origin main
+          git reset --hard origin/main
+          bun install --frozen-lockfile --production
+          rm -rf dist
+          tar -xzf /tmp/portfolio-dist.tgz -C .
+          rm -f /tmp/portfolio-dist.tgz
+          sudo /usr/bin/systemctl restart portfolio.service
+          sleep 3
+          systemctl is-active --quiet portfolio.service
+          REMOTE
