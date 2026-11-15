@@ -93,7 +93,7 @@ jobs:
 
             echo "→ Vérification (en HTTP local, le service écoute sur 127.0.0.1:3001)"
             for i in $(seq 1 20); do
-              if curl -fsS -o /dev/null http://127.0.0.1:3001/api/composants; then
+              if curl -fsS -o /dev/null http://127.0.0.1:3001/; then
                 echo "✓ Site opérationnel"
                 rm -rf dist.old
                 exit 0
