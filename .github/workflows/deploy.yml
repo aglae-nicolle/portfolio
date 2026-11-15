@@ -10,8 +10,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  verifier:
-    name: Build de contrôle
+  construire:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,23 +21,50 @@ jobs:
       - name: Installer les dépendances
         run: bun install --frozen-lockfile
 
+      # Le build se fait ici et pas sur le VPS : le processeur du VPS n'a pas
+      # AVX2, et le compilateur natif d'Astro (@astrojs/compiler-binding) plante
+      # avec "Illegal instruction" dessus.
       - name: Construire le site
         run: bun run build
         env:
           SITE_URL: ${{ vars.SITE_URL || 'http://localhost:3001' }}
 
+      - name: Archiver le build
+        run: tar -czf dist.tgz -C dist .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist.tgz
+          retention-days: 7
+
   deployer:
     name: Déployer sur le VPS
-    needs: verifier
+    needs: construire
     runs-on: ubuntu-latest
     steps:
-      - name: Mettre à jour, construire et redémarrer
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+
+      - name: Envoyer le build sur le VPS
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          source: dist.tgz
+          target: /tmp/portfolio-deploy
+          overwrite: true
+
+      - name: Mettre à jour et redémarrer
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT}}
+          port: ${{ secrets.VPS_PORT }}
           command_timeout: 15m
           script: |
             set -euo pipefail
@@ -49,12 +76,16 @@ jobs:
             # reset plutôt que pull : aucun conflit possible (ex. bun.lock modifié sur le serveur)
             git reset --hard origin/main
 
-            echo "→ Dépendances"
+            echo "→ Dépendances (nécessaires à l'exécution du serveur)"
             bun install --frozen-lockfile
 
-            echo "→ Build (avec les variables de production)"
-            set -a; . /var/www/portfolio/app/.env; set +a
-            bun run build
+            echo "→ Installation du build"
+            rm -rf dist.new dist.old
+            mkdir dist.new
+            tar -xzf /tmp/portfolio-deploy/dist.tgz -C dist.new
+            if [ -d dist ]; then mv dist dist.old; fi
+            mv dist.new dist
+            rm -rf /tmp/portfolio-deploy
 
             echo "→ Redémarrage du service"
             sudo /usr/bin/systemctl restart portfolio
@@ -63,6 +94,7 @@ jobs:
             for i in $(seq 1 20); do
               if curl -fsS -o /dev/null http://127.0.0.1:3001/api/composants; then
                 echo "✓ Site opérationnel"
+                rm -rf dist.old
                 exit 0
               fi
               sleep 2

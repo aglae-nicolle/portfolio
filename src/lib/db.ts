@@ -1,6 +1,6 @@
 import { Database } from 'bun:sqlite';
 
-const dbPath = process.env.DATABASE_PATH ?? './db/portfolio.sqlite';
+const dbPath = process.env.DATABASE_PATH ?? './data/portfolio.sqlite';
 
 export const db = new Database(dbPath, { create: true });
 db.exec('PRAGMA journal_mode = WAL;');
