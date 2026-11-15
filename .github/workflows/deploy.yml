@@ -82,13 +82,14 @@ jobs:
             echo "→ Installation du build"
             rm -rf dist.new dist.old
             mkdir dist.new
-            tar -xzf /tmp/portfolio-deploy/dist.tgz -C dist.new
+            # -m : ignore les dates des fichiers (l'horloge du VPS est décalée)
+            tar -xzmf /tmp/portfolio-deploy/dist.tgz -C dist.new
             if [ -d dist ]; then mv dist dist.old; fi
             mv dist.new dist
             rm -rf /tmp/portfolio-deploy
 
             echo "→ Redémarrage du service"
-            sudo /usr/bin/systemctl restart portfolio
+            sudo -n /usr/bin/systemctl restart portfolio
 
             echo "→ Vérification (en HTTP local, le service écoute sur 127.0.0.1:3001)"
             for i in $(seq 1 20); do
@@ -100,5 +101,5 @@ jobs:
               sleep 2
             done
             echo "✗ Le site ne répond pas, derniers journaux :"
-            sudo /usr/bin/journalctl -u portfolio -n 50 --no-pager || true
+            sudo -n /usr/bin/journalctl -u portfolio -n 50 --no-pager || true
             exit 1
