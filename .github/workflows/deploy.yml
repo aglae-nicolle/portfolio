@@ -1,25 +1,72 @@
-name: Deploy
+name: Déploiement
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: deploiement-production
+  cancel-in-progress: false
+
 jobs:
-  deploy:
+  verifier:
+    name: Build de contrôle
     runs-on: ubuntu-latest
     steps:
-      - name: Mise à jour sur le VPS
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Installer les dépendances
+        run: bun install --frozen-lockfile
+
+      - name: Construire le site
+        run: bun run build
+        env:
+          SITE_URL: ${{ vars.SITE_URL || 'http://localhost:3001' }}
+
+  deployer:
+    name: Déployer sur le VPS
+    needs: verifier
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mettre à jour, construire et redémarrer
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT}}
+          command_timeout: 15m
           script: |
-            set -e
-            cd /var/www/portfolio
-            git fetch origin main
+            set -euo pipefail
+            export PATH="$HOME/.bun/bin:$PATH"
+            cd /var/www/portfolio/app
+
+            echo "→ Récupération du code"
+            git fetch --prune origin main
+            # reset plutôt que pull : aucun conflit possible (ex. bun.lock modifié sur le serveur)
             git reset --hard origin/main
-            ~/.bun/bin/bun install --frozen-lockfile
-            ~/.bun/bin/bun run build
-            sudo systemctl restart portfolio
+
+            echo "→ Dépendances"
+            bun install --frozen-lockfile
+
+            echo "→ Build (avec les variables de production)"
+            set -a; . /var/www/portfolio/app/.env; set +a
+            bun run build
+
+            echo "→ Redémarrage du service"
+            sudo /usr/bin/systemctl restart portfolio
+
+            echo "→ Vérification (en HTTP local, le service écoute sur 127.0.0.1:3001)"
+            for i in $(seq 1 20); do
+              if curl -fsS -o /dev/null http://127.0.0.1:3001/api/composants; then
+                echo "✓ Site opérationnel"
+                exit 0
+              fi
+              sleep 2
+            done
+            echo "✗ Le site ne répond pas, derniers journaux :"
+            sudo /usr/bin/journalctl -u portfolio -n 50 --no-pager || true
+            exit 1
