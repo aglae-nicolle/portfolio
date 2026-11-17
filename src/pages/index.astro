@@ -27,22 +27,26 @@ const { logiciels, langages } = getOutilsParType();
           <br />
           <span class="pl-[0.6em]">Nicolle</span>
         </h1>
-        <p class="text-b1 mt-4.5 text-vert-fonce lg:text-h3 lg:mt-17.25 lg:self-center">
+        <p class="text-b1 mt-27 text-vert-fonce lg:text-h3 lg:mt-10 lg:self-center">
           Étudiante en 2e année de IUT MMI
         </p>
-        <p class="mt-4.5 text-[16px] leading-[1.4] lg:text-b1 lg:mt-8 lg:ml-6">
-          <a href={`mailto:${SITE.email}`} class="hover:text-marron-fonce">
-            {SITE.email}
-          </a>
-          <br />
-          <a href={`tel:${SITE.telephoneLien}`} class="hover:text-marron-fonce">
-            {SITE.telephone}
-          </a>
-        </p>
+        <a
+          href={`mailto:${SITE.email}`}
+          class="lien-sommaire mt-4.5 text-[16px] leading-[1.4] lg:text-b1 lg:mt-11 lg:ml-6"
+        >
+          {SITE.email}
+        </a>
+        <br />
+        <a
+          href={`tel:${SITE.telephoneLien}`}
+          class="lien-sommaire text-[16px] leading-[1.4] lg:text-b1 lg:ml-6"
+        >
+          {SITE.telephone}
+        </a>
         <a
           href={SITE.cv}
           download
-          class="btn mt-27 hidden lg:ml-6 lg:inline-flex lg:w-86"
+          class="btn mt-15 hidden lg:ml-6 lg:inline-flex lg:w-86"
         >
           &lt;Télécharger mon CV&gt;
         </a>

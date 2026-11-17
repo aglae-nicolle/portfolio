@@ -5,8 +5,8 @@ export const SITE = {
   email: 'aglaencl@gmail.com',
   telephone: '06 95 98 71 51',
   telephoneLien: '+33695987151',
-  // Dépose ton CV dans public/ sous ce nom pour activer les boutons « Télécharger mon CV »
-  cv: '/cv-aglae-nicolle.pdf',
+  // Fichier du CV (dans public/) utilisé par les boutons « Télécharger mon CV »
+  cv: '/CV.pdf',
 };
 
 export const PAGES = [
