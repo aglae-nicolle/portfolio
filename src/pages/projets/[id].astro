@@ -42,7 +42,7 @@ const contenu = (projet.contenuPageProjet ?? "").replace(
   <article>
     <!-- En-tête du projet -->
     <header class="container-page grid grid-cols-[144px_minmax(0,1fr)] gap-x-2.5 pt-9 lg:grid-cols-[min(480px,40%)_minmax(0,1fr)] lg:gap-x-12 lg:pt-20 xl:gap-x-21.25">
-      <div class="col-span-2 flex flex-wrap items-center justify-between gap-4 lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:mt-3">
+      <div class="col-span-2 flex flex-wrap items-baseline justify-between gap-4 lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:mt-3">
         <h1 class="text-h1" style={`view-transition-name: projet-titre-${id}`}>{projet.nomProjet}</h1>
         {projet.urlProjet && (
           <a
