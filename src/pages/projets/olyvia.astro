@@ -1,13 +1,28 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import OutilItem from "../components/OutilItem.astro";
-import GalerieProjet from "../components/GalerieProjet.astro";
-import { getProjet, getOutilsDuProjet, getImagesDuProjet } from "../lib/db";
-import { getImageUrl, stripHtml } from "../js/backend";
+import Layout from "../../layouts/Layout.astro";
+import OutilItem from "../../components/OutilItem.astro";
+import GalerieProjet from "../../components/GalerieProjet.astro";
+import { getProjet, getOutilsDuProjet, getImagesDuProjet } from "../../lib/db";
+import { getImageUrl, stripHtml } from "../../js/backend";
 
-const id = Number(Astro.params.id);
-const projet = Number.isInteger(id) ? getProjet(id) : null;
-if (!projet) return Astro.redirect("/404");
+// PAGE DE TEST (brouillon) : sert à prévisualiser le HTML de `contenuPageProjet`
+// avant de le copier dans la base. Accessible uniquement avec `astro dev`
+// (http://localhost:4321/projets/olyvia) : sur le site en ligne, elle renvoie une 404.
+if (!import.meta.env.DEV) {
+    return new Response(null, { status: 404 });
+}
+
+// Projet de la base utilisé pour l'en-tête (titre, image, description, outils, galerie).
+const id = 1;
+const projet = getProjet(id);
+if (!projet) throw new Error(`Page de test : aucun projet avec l'id ${id} dans la base.`);
+
+// HTML à tester : écris-le ici, puis copie-le dans PROJET.contenuPageProjet une fois validé.
+// Chaque <h2> ajoute automatiquement une entrée dans le sommaire.
+const contenuTest = `
+<h2>Le projet</h2>
+<p>Texte de test…</p>
+`;
 
 const outils = getOutilsDuProjet(id);
 const imageCard = getImageUrl(projet, "imageCard");
@@ -25,7 +40,7 @@ const sommaire: { id: string; titre: string }[] = [];
 if (outils.length > 0)
     sommaire.push({ id: "competences", titre: "Compétences" });
 let n = 0;
-const contenu = (projet.contenuPageProjet ?? "").replace(
+const contenu = contenuTest.replace(
     /<h2(\s[^>]*)?>([\s\S]*?)<\/h2>/gi,
     (_m, attrs = "", titre) => {
         const ancre = `section-${++n}`;
@@ -41,8 +56,8 @@ const contenu = (projet.contenuPageProjet ?? "").replace(
 >
     <article>
         <!-- En-tête du projet -->
-        <header class="container-page grid grid-cols-[144px_1fr] gap-x-2.5 pt-9 lg:grid-cols-[480px_1fr] lg:gap-x-21.25 lg:pt-20">
-            <div class="col-span-2 flex items-start justify-between gap-4 lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:mt-3">
+        <header class="container-page grid grid-cols-[144px_minmax(0,1fr)] gap-x-2.5 pt-9 lg:grid-cols-[min(480px,40%)_minmax(0,1fr)] lg:gap-x-12 lg:pt-20 xl:gap-x-21.25">
+            <div class="col-span-2 flex flex-wrap items-center justify-between gap-4 lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:mt-3">
                 <h1
                     class="text-h1"
                     style={`view-transition-name: projet-titre-${id}`}
@@ -62,7 +77,7 @@ const contenu = (projet.contenuPageProjet ?? "").replace(
             </div>
 
             <div
-                class="mt-6.5 size-36 overflow-hidden rounded-[15px] border border-vert-clair bg-marron-clair lg:row-span-3 lg:row-start-1 lg:mt-0 lg:size-120 lg:rounded-[40px]"
+                class="mt-6.5 size-36 overflow-hidden rounded-[15px] border border-vert-clair bg-marron-clair lg:row-span-3 lg:row-start-1 lg:mt-0 lg:aspect-square lg:size-auto lg:w-full lg:rounded-[40px]"
                 style={`view-transition-name: projet-image-${id}`}
             >
                 {imageCard && (
@@ -130,7 +145,7 @@ const contenu = (projet.contenuPageProjet ?? "").replace(
             </section>
         )}
 
-        <!-- Contenu éditorial (HTML stocké en base) -->
+        <!-- Contenu éditorial (HTML de test, voir contenuTest) -->
         <div class="container-page mt-10 lg:mt-26.25">
             <div class="prose-projet" set:html={contenu} />
 
