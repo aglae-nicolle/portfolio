@@ -96,7 +96,19 @@
   }
 
   .prose-projet h2 { @apply text-h2 mb-6 scroll-mt-22.5 lg:mb-9 lg:scroll-mt-27.5; }
+  /* Espace avant chaque nouvelle section (plus grand que celui des h3, pour garder la hiérarchie) */
+  .prose-projet h2:not(:first-child) { @apply mt-12 lg:mt-16; }
   .prose-projet p { @apply text-b2 mb-4; }
+
+  /* Sous-titres : Manrope semi-gras marron, entre les paragraphes et les h2 */
+  .prose-projet h3 {
+    @apply mt-8 mb-3 text-[18px] leading-tight font-semibold text-marron-fonce lg:mt-10 lg:mb-4 lg:text-[24px];
+  }
+  .prose-projet h3:first-child { @apply mt-0; }
+
+  /* Listes (souvent sous un h3) : puces marron, même taille de texte que les paragraphes */
+  .prose-projet ul { @apply text-b2 mb-4 list-disc space-y-1 pl-5 marker:text-marron-fonce; }
+  .prose-projet ol { @apply text-b2 mb-4 list-decimal space-y-1 pl-5 marker:text-marron-fonce; }
 }
 
 /* HTML venant de la base. Hors @layer pour passer devant les utilitaires Tailwind. */
