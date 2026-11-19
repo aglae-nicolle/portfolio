@@ -17,7 +17,7 @@ const liens = [
     <div class="flex w-60.5 flex-col items-center">
       <img
         src={serpent.src}
-        alt=""
+        alt={`Logo serpent de ${SITE.nom}`}
         width="137"
         height="136"
         class="h-34 w-34.25"
@@ -38,7 +38,7 @@ const liens = [
             href={`tel:${SITE.telephoneLien}`}
             class="flex items-center gap-4.75 hover:text-jaune"
           >
-            <img src={telephone.src} alt="" width="24" height="23" />
+            <img src={telephone.src} alt="Téléphone :" width="24" height="23" />
             {SITE.telephone}
           </a>
         </li>
@@ -47,7 +47,7 @@ const liens = [
             href={`mailto:${SITE.email}`}
             class="flex items-center gap-4.75 hover:text-jaune"
           >
-            <img src={arobase.src} alt="" width="23" height="23" />
+            <img src={arobase.src} alt="E-mail :" width="23" height="23" />
             {SITE.email}
           </a>
         </li>
@@ -94,7 +94,7 @@ const liens = [
       ))}
     </ul>
     <div class="mt-11.5 flex items-center gap-4">
-      <img src={serpent.src} alt="" width="47" height="47" class="size-11.75" />
+      <img src={serpent.src} alt={`Logo serpent de ${SITE.nom}`} width="47" height="47" class="size-11.75" />
       <div class="text-left">
         <p class="text-[18px] leading-loose">{SITE.nom}</p>
         <p class="text-[12px] uppercase leading-[1.6] tracking-wider">

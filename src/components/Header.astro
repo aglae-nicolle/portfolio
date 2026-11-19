@@ -16,7 +16,7 @@ const chemin = Astro.url.pathname;
   >
     <!-- Entre 1024 et 1280 px, espacements resserrés pour que la mention tienne à côté du menu -->
     <a href="/" class="flex items-center gap-3.75 lg:gap-4 xl:gap-6.5">
-      <img src={logo.src} alt="" width="48" height="48" class="size-12" />
+      <img src={logo.src} alt={`Logo de ${SITE.nom}`} width="48" height="48" class="size-12" />
       <span class="text-h3 whitespace-nowrap">{`{ ${SITE.nom} }`}</span>
       <span class="text-sm-upper hidden pt-1 whitespace-nowrap lg:inline">{SITE.metier}</span>
     </a>
@@ -45,7 +45,7 @@ const chemin = Astro.url.pathname;
       aria-expanded="false"
       aria-label="Ouvrir le menu"
     >
-      <img src={iconeMenu.src} alt="" width="24" height="24" class="size-6" />
+      <img src={iconeMenu.src} alt="Menu" width="24" height="24" class="size-6" />
     </button>
   </nav>
 
@@ -59,11 +59,11 @@ const chemin = Astro.url.pathname;
   >
     <div class="flex h-18 shrink-0 items-center justify-between px-6">
       <a href="/" class="flex items-center gap-3.75 text-vert-clair">
-        <img src={logo.src} alt="" width="48" height="48" class="size-12" />
+        <img src={logo.src} alt={`Logo de ${SITE.nom}`} width="48" height="48" class="size-12" />
         <span class="text-h3 whitespace-nowrap">{`{ ${SITE.nom} }`}</span>
       </a>
       <button type="button" id="menu-fermer" aria-label="Fermer le menu">
-        <img src={iconeCroix.src} alt="" width="13" height="14" />
+        <img src={iconeCroix.src} alt="Fermer" width="13" height="14" />
       </button>
     </div>
 
@@ -103,7 +103,7 @@ const chemin = Astro.url.pathname;
       <div class="mt-16 flex items-center gap-4">
         <img
           src={serpent.src}
-          alt=""
+          alt={`Logo serpent de ${SITE.nom}`}
           width="47"
           height="47"
           class="size-11.75"

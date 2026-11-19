@@ -22,7 +22,7 @@ const { outil, taille = "normale" } = Astro.props;
       taille === "grande" ? "size-8 lg:size-14.25" : "size-6 lg:size-8",
     ]}
   >
-    <OutilIcon icon={outil.iconOutils} class="size-full" />
+    <OutilIcon icon={outil.iconOutils} alt={`Logo ${outil.nomOutils.trim()}`} class="size-full" />
   </span>
   <span class="text-b1 min-w-0">{outil.nomOutils.trim()}</span>
 </li>
