@@ -19,8 +19,15 @@ const personne = {
   jobTitle: SITE.metier,
   url: Astro.site?.href,
   email: `mailto:${SITE.email}`,
-  address: { "@type": "PostalAddress", addressLocality: "Montbéliard", addressCountry: "FR" },
-  alumniOf: { "@type": "CollegeOrUniversity", name: "IUT Nord Franche-Comté – BUT MMI (Montbéliard)" },
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Montbéliard",
+    addressCountry: "FR",
+  },
+  alumniOf: {
+    "@type": "CollegeOrUniversity",
+    name: "IUT Nord Franche-Comté – BUT MMI (Montbéliard)",
+  },
   knowsAbout: langages.map((o) => o.nomOutils.trim()),
   ...(SITE.profils.length > 0 && { sameAs: SITE.profils }),
 };
@@ -52,7 +59,7 @@ const personne = {
           <span class="pl-[0.6em]">Nicolle</span>
         </h1>
         <p class="text-b1 mt-27 text-vert-fonce lg:text-h3 lg:mt-10 lg:self-center">
-          Étudiante en 2e année de IUT MMI
+          Développeuse Full Stack
         </p>
         <a
           href={`mailto:${SITE.email}`}
@@ -72,7 +79,8 @@ const personne = {
           download
           class="btn mt-15 hidden lg:ml-6 lg:inline-flex lg:w-86"
         >
-          &lt;Télécharger mon CV&gt;<span class="sr-only"> ({SITE.cvInfos})</span>
+          &lt;Télécharger mon CV&gt;
+          <span class="sr-only"> ({SITE.cvInfos})</span>
         </a>
       </div>
     </div>
