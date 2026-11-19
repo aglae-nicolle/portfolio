@@ -33,10 +33,11 @@ const images = getImagesDuProjet(id)
   }))
   .filter((i): i is typeof i & { src: string } => Boolean(i.src));
 
-// Sommaire : « Compétences » + chaque <h2> du contenu stocké en base (on leur ajoute un id pour les ancres).
-const sommaire: { id: string; titre: string }[] = [];
+// Sommaire : le <h2> de la section outils + chaque <h2> du contenu stocké en base (on leur ajoute un id pour les ancres).
+// `titreMobile` : intitulé affiché sous 1024 px, quand le <h2> change selon la taille d'écran.
+const sommaire: { id: string; titre: string; titreMobile?: string }[] = [];
 if (outils.length > 0)
-  sommaire.push({ id: "competences", titre: "Compétences" });
+  sommaire.push({ id: "competences", titre: "Mes outils utilisés", titreMobile: "Compétences" });
 let n = 0;
 const contenu = (projet.contenuPageProjet ?? "").replace(
   /<h2(\s[^>]*)?>([\s\S]*?)<\/h2>/gi,
@@ -109,7 +110,15 @@ const contenu = (projet.contenuPageProjet ?? "").replace(
             {sommaire.map((s, i) => (
               <li>
                 <a href={`#${s.id}`} class="lien-sommaire">
-                  {i + 1}- {s.titre}
+                  {i + 1}-{" "}
+                  {s.titreMobile ? (
+                    <>
+                      <span class="lg:hidden">{s.titreMobile}</span>
+                      <span class="hidden lg:inline">{s.titre}</span>
+                    </>
+                  ) : (
+                    s.titre
+                  )}
                 </a>
               </li>
             ))}
