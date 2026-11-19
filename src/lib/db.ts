@@ -22,7 +22,32 @@ export type Outil = {
   typeOutils: 'logiciel' | 'langage' | null;
   ordreOutils: number | null;
 };
-export type Image = { idImg: string | null; img: string | Buffer; idProjet: number; altImg: string | null };
+export type Image = {
+  cle: number; // rowid de la ligne (= idImg quand idImg est un INTEGER PRIMARY KEY), sert à l'URL /img/galerie/<cle>
+  idImg: string | number | null;
+  img: string | Buffer;
+  idProjet: number;
+  altImg: string | null;
+};
+
+/**
+ * Identifiant lisible d'un projet pour son URL, calculé à partir de son nom :
+ * « TiK•TaK » → « tik-tak », « Eyeth » → « eyeth ». Pas de colonne en base, donc rien à migrer.
+ */
+export function slugProjet(nom: string): string {
+  return nom
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // accents
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/** Projet dont le nom donne ce slug, ou null. */
+export function getProjetParSlug(slug: string): Projet | null {
+  const projets = db.prepare('SELECT * FROM PROJET').all() as Projet[];
+  return projets.find((p) => slugProjet(p.nomProjet) === slug) ?? null;
+}
 
 /** Projets, filtrables par école (nomEcole). Sans filtre : tous les projets. */
 export function getProjets(ecole?: string): (Projet & { ecoles: string })[] {
@@ -50,7 +75,11 @@ export function getOutilsDuProjet(id: number): Outil[] {
 }
 
 export function getImagesDuProjet(id: number): Image[] {
-  return db.prepare('SELECT * FROM IMAGE WHERE idProjet = ?').all(id) as Image[];
+  return db.prepare('SELECT rowid AS cle, * FROM IMAGE WHERE idProjet = ?').all(id) as Image[];
+}
+
+export function getImageParRowid(rowid: number): Image | null {
+  return (db.prepare('SELECT rowid AS cle, * FROM IMAGE WHERE rowid = ?').get(rowid) as Image | undefined) ?? null;
 }
 
 export function getAllOutils(): Outil[] {

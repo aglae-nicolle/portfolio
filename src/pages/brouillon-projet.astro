@@ -1,13 +1,13 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import OutilItem from "../../components/OutilItem.astro";
-import GalerieProjet from "../../components/GalerieProjet.astro";
-import { getProjet, getOutilsDuProjet, getImagesDuProjet } from "../../lib/db";
-import { getImageUrl, stripHtml } from "../../js/backend";
+import Layout from "../layouts/Layout.astro";
+import OutilItem from "../components/OutilItem.astro";
+import GalerieProjet from "../components/GalerieProjet.astro";
+import { getProjet, getOutilsDuProjet, getImagesDuProjet } from "../lib/db";
+import { urlImageCard, urlImageGalerie, stripHtml } from "../js/backend";
 
 // PAGE DE TEST (brouillon) : sert à prévisualiser le HTML de `contenuPageProjet`
 // avant de le copier dans la base. Accessible uniquement avec `astro dev`
-// (http://localhost:4321/projets/olyvia) : sur le site en ligne, elle renvoie une 404.
+// (http://localhost:4321/brouillon-projet) : sur le site en ligne, elle renvoie une 404.
 if (!import.meta.env.DEV) {
     return new Response(null, { status: 404 });
 }
@@ -32,12 +32,12 @@ const contenuTest = `
 `;
 
 const outils = getOutilsDuProjet(id);
-const imageCard = getImageUrl(projet, "imageCard");
+const imageCard = urlImageCard(projet);
 // On ne garde que les images réellement affichables.
 // Le texte alternatif vient de IMAGE.altImg (il s'affiche aussi en légende au survol).
 const images = getImagesDuProjet(id)
     .map((i, idx) => ({
-        src: getImageUrl(i, "img"),
+        src: urlImageGalerie(i),
         alt: i.altImg?.trim() || `${projet.nomProjet} – image ${idx + 1}`,
     }))
     .filter((i): i is { src: string; alt: string } => Boolean(i.src));
@@ -60,6 +60,7 @@ const contenu = contenuTest.replace(
 <Layout
     title={projet.nomProjet}
     description={stripHtml(projet.descriptionProjet) || undefined}
+    noindex
 >
     <article>
         <!-- En-tête du projet -->

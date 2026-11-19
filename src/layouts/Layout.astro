@@ -4,18 +4,66 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Curseur from '../components/Curseur.astro';
 import logo from '../assets/logo/logo.svg';
+import { getImage } from 'astro:assets';
+import pdp from '../assets/image/paquerette.webp';
+import { SITE } from '../lib/site';
 
-interface Props { title: string; description?: string }
-const { title, description = 'Portfolio d’Aglaé Nicolle, étudiante en développement web.' } = Astro.props;
+interface Props {
+  title: string;
+  /** Description de la page (balise meta et aperçu de partage). Chaque page passe la sienne. */
+  description?: string;
+  /** Image d'aperçu pour le partage (chemin ou URL). Par défaut : la photo de l'accueil. */
+  image?: string;
+  /** Type Open Graph : « website » pour les pages, « article » pour les projets. */
+  type?: 'website' | 'article';
+  /** Pages à ne pas indexer (404, brouillon). */
+  noindex?: boolean;
+  /** Données structurées JSON-LD propres à la page (ex : Person sur l'accueil). */
+  jsonLd?: Record<string, unknown>;
+}
+const {
+  title,
+  description = SITE.description,
+  image,
+  type = 'website',
+  noindex = false,
+  jsonLd,
+} = Astro.props;
+
+// Google coupe les descriptions vers 155-160 caractères : on coupe proprement sur un mot.
+const descriptionCourte =
+  description.length <= 160 ? description : description.slice(0, 157).replace(/\s+\S*$/, '') + '…';
+
+// URL absolues : `site` est défini dans astro.config.mjs.
+// La canonique ne garde que le chemin : /projets?ecole=UTBM a pour canonique /projets.
+const canonique = new URL(Astro.url.pathname, Astro.site).href;
+const imageParDefaut = (await getImage({ src: pdp, width: 1200, height: 630, format: 'jpeg', fit: 'cover' })).src;
+const imagePartage = new URL(image ?? imageParDefaut, Astro.site).href;
+const titreComplet = `${title} | ${SITE.nom}`;
 ---
 <!doctype html>
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={description} />
-    <title>{title} | Aglaé Nicolle</title>
+    <title>{titreComplet}</title>
+    <meta name="description" content={descriptionCourte} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonique} />}
+
+    <!-- Aperçu lors du partage (LinkedIn, Discord, messageries…) -->
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={SITE.nom} />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:title" content={titreComplet} />
+    <meta property="og:description" content={descriptionCourte} />
+    <meta property="og:url" content={canonique} />
+    <meta property="og:image" content={imagePartage} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />}
+
     <link rel="icon" href={logo.src} type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap.xml" />
     <link rel="preload" href="/fonts/kingred.otf" as="font" type="font/otf" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

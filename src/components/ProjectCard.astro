@@ -2,16 +2,16 @@
 // Carte projet de la maquette :
 // - "verticale"   : 246 × 427 (carrousel de l'accueil, grille desktop de /projets)
 // - "horizontale" : 353 × 122 (liste mobile de /projets)
-import type { Projet } from "../lib/db";
-import { getImageUrl } from "../js/backend.ts";
+import { slugProjet, type Projet } from "../lib/db";
+import { urlImageCard } from "../js/backend.ts";
 
 interface Props {
   projet: Projet & { ecoles?: string };
   variante?: "verticale" | "horizontale";
 }
 const { projet, variante = "verticale" } = Astro.props;
-const image = getImageUrl(projet, "imageCard");
-const lien = `/projets/${projet.idProjet}`;
+const image = urlImageCard(projet);
+const lien = `/projets/${slugProjet(projet.nomProjet)}`;
 // Mêmes noms que dans projets/[id].astro : le navigateur fait « voyager » l'image et le titre
 // de la carte jusqu'à l'en-tête de la page projet (View Transitions, voir global.css).
 const vtImage = `projet-image-${projet.idProjet}`;

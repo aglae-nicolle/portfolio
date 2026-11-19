@@ -8,7 +8,12 @@ const FILTRES = ["tous", "IUT MMI", "UTBM", "Personnels"];
 const projets = getProjets(filtre);
 ---
 
-<Layout title="Mes projets">
+<Layout
+  title="Mes projets"
+  description={filtre && FILTRES.includes(filtre)
+    ? `Projets d’Aglaé Nicolle réalisés à ${filtre === "Personnels" ? "titre personnel" : `l’${filtre}`} : sites web, maquettes et applications.`
+    : "Tous les projets d’Aglaé Nicolle (IUT MMI, UTBM, projets personnels) : sites web, maquettes et applications, avec les outils utilisés."}
+>
   <section class="pt-9.25 lg:pt-21.5">
     <h1 class="text-h1 container-page">Mes projets</h1>
 

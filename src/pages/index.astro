@@ -9,9 +9,28 @@ import pdp from "../assets/image/paquerette.webp";
 
 const projets = getProjets().slice(0, 6);
 const { logiciels, langages } = getOutilsParType();
+
+// Données structurées : indiquent aux moteurs de recherche que ce site est celui d'une personne,
+// avec son métier et sa formation (schema.org/Person).
+const personne = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: SITE.nom,
+  jobTitle: SITE.metier,
+  url: Astro.site?.href,
+  email: `mailto:${SITE.email}`,
+  address: { "@type": "PostalAddress", addressLocality: "Montbéliard", addressCountry: "FR" },
+  alumniOf: { "@type": "CollegeOrUniversity", name: "IUT Nord Franche-Comté – BUT MMI (Montbéliard)" },
+  knowsAbout: langages.map((o) => o.nomOutils.trim()),
+  ...(SITE.profils.length > 0 && { sameAs: SITE.profils }),
+};
 ---
 
-<Layout title="Accueil">
+<Layout
+  title="Accueil"
+  description="Aglaé Nicolle, étudiante en 2e année de BUT MMI à Montbéliard, développeuse web full stack. Découvrez mes projets, mes outils et téléchargez mon CV."
+  jsonLd={personne}
+>
   <!-- Hero -->
   <section class="mx-auto flex max-w-360 flex-col items-center px-7 pt-17.25 lg:px-30 lg:pt-18.25">
     <div class="flex w-full items-center justify-between gap-6 lg:w-auto lg:justify-center lg:gap-18">

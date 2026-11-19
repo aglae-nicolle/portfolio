@@ -2,20 +2,31 @@
 import Layout from "../../layouts/Layout.astro";
 import OutilItem from "../../components/OutilItem.astro";
 import GalerieProjet from "../../components/GalerieProjet.astro";
-import { getProjet, getOutilsDuProjet, getImagesDuProjet } from "../../lib/db";
-import { getImageUrl, stripHtml } from "../../js/backend";
+import { getProjet, getProjetParSlug, slugProjet, getOutilsDuProjet, getImagesDuProjet } from "../../lib/db";
+import { urlImageCard, urlImageGalerie, stripHtml } from "../../js/backend";
 
-const id = Number(Astro.params.id);
-const projet = Number.isInteger(id) ? getProjet(id) : null;
-if (!projet) return Astro.redirect("/404");
+const param = Astro.params.slug ?? "";
 
+// Anciennes URL numériques (/projets/2) : redirection permanente vers l'URL lisible (/projets/olyvia),
+// pour ne pas casser les liens déjà partagés et pour que Google ne garde qu'une adresse par projet.
+if (/^\d+$/.test(param)) {
+  const ancien = getProjet(Number(param));
+  if (ancien) return Astro.redirect(`/projets/${slugProjet(ancien.nomProjet)}`, 301);
+}
+
+const projet = getProjetParSlug(param);
+// Projet inconnu : on affiche la page 404 avec un vrai code 404 (et non une redirection 302 vers /404).
+if (!projet) return Astro.rewrite("/404");
+
+const id = projet.idProjet;
 const outils = getOutilsDuProjet(id);
-const imageCard = getImageUrl(projet, "imageCard");
+const imageCard = urlImageCard(projet);
+const description = stripHtml(projet.descriptionProjet);
 // On ne garde que les images réellement affichables.
 // Le texte alternatif vient de IMAGE.altImg (il s'affiche aussi en légende au survol).
 const images = getImagesDuProjet(id)
   .map((i, idx) => ({
-    src: getImageUrl(i, "img"),
+    src: urlImageGalerie(i),
     alt: i.altImg?.trim() || `${projet.nomProjet} – image ${idx + 1}`,
   }))
   .filter((i): i is { src: string; alt: string } => Boolean(i.src));
@@ -37,7 +48,9 @@ const contenu = (projet.contenuPageProjet ?? "").replace(
 
 <Layout
   title={projet.nomProjet}
-  description={stripHtml(projet.descriptionProjet) || undefined}
+  description={description ? `${projet.nomProjet} : ${description}` : `${projet.nomProjet}, projet réalisé par Aglaé Nicolle.`}
+  image={imageCard ?? undefined}
+  type="article"
 >
   <article>
     <!-- En-tête du projet -->
@@ -52,6 +65,7 @@ const contenu = (projet.contenuPageProjet ?? "").replace(
             class="btn mb-0.75 w-47 shrink-0 lg:mb-1 lg:w-71"
           >
             &lt;Consulter le site&gt;
+            <span class="sr-only"> {projet.nomProjet} (nouvel onglet)</span>
           </a>
         )}
       </div>

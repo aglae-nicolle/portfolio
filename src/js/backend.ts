@@ -24,21 +24,24 @@ export function getImagesDuProjet(idProjet: number): Image[] {
     return db.prepare("SELECT * FROM IMAGE WHERE idProjet = ?").all(idProjet) as Image[];
 }
 
+/** Contenu d'un champ image : soit un chemin / une URL, soit l'image elle-même (octets + type MIME). */
+export type ContenuImage = { url: string } | { bytes: Buffer; mime: string };
+
 /**
- * Renvoie une URL utilisable dans <img src> pour le champ image d'un enregistrement.
- * - Si le champ contient un chemin ou une URL (ex: "/images/x.webp"), il est renvoyé tel quel.
- * - Si le champ contient l'image elle-même (BLOB), elle est convertie en data URL.
+ * Lit le champ image d'un enregistrement.
+ * - Chemin ou URL (ex: "/images/x.webp") : renvoyé tel quel dans `url`.
+ * - Image binaire (BLOB) : renvoyée en octets avec son type MIME.
+ * - Champ vide ou illisible : null.
  */
-export function getImageUrl<T extends object>(record: T | null | undefined, imageField: keyof T): string | null {
-    const value = record?.[imageField] as unknown;
+export function lireImage(value: unknown, champ = "image"): ContenuImage | null {
     if (!value) return null;
 
     if (typeof value === "string") {
         // Chemin, URL ou data URL : utilisable directement.
-        if (/^(\/|https?:\/\/|data:)/.test(value.trim())) return value.trim();
+        if (/^(\/|https?:\/\/|data:)/.test(value.trim())) return { url: value.trim() };
         // Sinon c'est une image binaire qui a été enregistrée comme du TEXTE :
         // ses octets ont été altérés et elle ne peut pas s'afficher.
-        console.warn(`[getImageUrl] Image illisible dans le champ "${String(imageField)}" : elle doit être réenregistrée en BLOB ou remplacée par un chemin.`);
+        console.warn(`[lireImage] Image illisible dans le champ "${champ}" : elle doit être réenregistrée en BLOB ou remplacée par un chemin.`);
         return null;
     }
 
@@ -46,14 +49,54 @@ export function getImageUrl<T extends object>(record: T | null | undefined, imag
     const bytes = Buffer.from(value);
     // Un chemin enregistré en BLOB reste un chemin.
     const asText = bytes.subarray(0, 8).toString("utf8");
-    if (/^(\/|https?:)/.test(asText)) return bytes.toString("utf8").trim();
+    if (/^(\/|https?:)/.test(asText)) return { url: bytes.toString("utf8").trim() };
 
     const mime = detectMimeType(bytes);
     if (mime === "application/octet-stream") {
-        console.warn(`[getImageUrl] Format d'image non reconnu dans le champ "${String(imageField)}".`);
+        console.warn(`[lireImage] Format d'image non reconnu dans le champ "${champ}".`);
         return null;
     }
-    return `data:${mime};base64,${bytes.toString("base64")}`;
+    return { bytes, mime };
+}
+
+/**
+ * Renvoie une URL utilisable dans <img src> pour le champ image d'un enregistrement.
+ * Un BLOB devient une data URL : à réserver aux cas où aucune route /img/… n'existe
+ * (les pages utilisent urlImageCard / urlImageGalerie, qui pointent vers un vrai fichier mis en cache).
+ */
+export function getImageUrl<T extends object>(record: T | null | undefined, imageField: keyof T): string | null {
+    const image = lireImage(record?.[imageField], String(imageField));
+    if (!image) return null;
+    return "url" in image ? image.url : `data:${image.mime};base64,${image.bytes.toString("base64")}`;
+}
+
+/** URL de l'image de carte d'un projet : servie par src/pages/img/projet/[id].ts (et non plus en base64 dans le HTML). */
+export function urlImageCard(projet: { idProjet: number; imageCard: unknown }): string | null {
+    const image = lireImage(projet.imageCard, "imageCard");
+    if (!image) return null;
+    return "url" in image ? image.url : `/img/projet/${projet.idProjet}`;
+}
+
+/** URL d'une image de galerie : servie par src/pages/img/galerie/[id].ts (id = rowid de la ligne IMAGE, champ `cle`). */
+export function urlImageGalerie(image: { cle: number; img: unknown }): string | null {
+    const contenu = lireImage(image.img, "img");
+    if (!contenu) return null;
+    return "url" in contenu ? contenu.url : `/img/galerie/${image.cle}`;
+}
+
+/** Réponse HTTP pour une image en BLOB, avec cache navigateur et ETag (réponse 304 si l'image n'a pas changé). */
+export function reponseImage(value: unknown, requete: Request): Response {
+    const image = lireImage(value);
+    if (!image || "url" in image) return new Response(null, { status: 404 });
+    const etag = `"${Bun.hash(image.bytes).toString(36)}"`;
+    const entetes = {
+        "Content-Type": image.mime,
+        // Une journée en cache, puis revalidation par l'ETag (l'image peut être remplacée en base).
+        "Cache-Control": "public, max-age=86400, must-revalidate",
+        ETag: etag,
+    };
+    if (requete.headers.get("If-None-Match") === etag) return new Response(null, { status: 304, headers: entetes });
+    return new Response(image.bytes, { headers: entetes });
 }
 
 /** Code SVG d'une icône stockée directement en base (OUTILS.iconOutils), sinon null. */
