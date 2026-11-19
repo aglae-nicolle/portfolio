@@ -49,12 +49,12 @@ const chemin = Astro.url.pathname;
     </button>
   </nav>
 
-  <!-- Menu mobile plein écran (maquette « menu-mobile ») -->
-  <div
+  <!-- Menu mobile plein écran (maquette « menu-mobile »).
+       <dialog> ouvert avec showModal() : le navigateur piège le focus dans le menu,
+       rend le reste de la page inerte et gère la touche Échap. -->
+  <dialog
     id="menu-mobile"
-    class="fixed inset-0 z-50 hidden flex-col bg-vert-fonce text-beige lg:hidden"
-    role="dialog"
-    aria-modal="true"
+    class="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none flex-col border-0 bg-vert-fonce p-0 text-beige open:flex lg:hidden"
     aria-label="Menu"
   >
     <div class="flex h-18 shrink-0 items-center justify-between px-6">
@@ -95,9 +95,9 @@ const chemin = Astro.url.pathname;
       <a
         href={SITE.cv}
         download
-        class="btn mt-16 w-53.25 border-vert-fonce text-vert-fonce"
+        class="btn mt-16 min-w-53.25 border-vert-fonce text-vert-fonce"
       >
-        &lt; Télécharger mon CV &gt;
+        &lt; Télécharger mon CV &gt;<span class="sr-only"> ({SITE.cvInfos})</span>
       </a>
 
       <div class="mt-16 flex items-center gap-4">
@@ -110,32 +110,38 @@ const chemin = Astro.url.pathname;
         />
         <div class="text-left text-marron-clair">
           <p class="text-[18px] leading-loose">{SITE.nom}</p>
-          <p class="text-[10px] uppercase leading-[1.6] tracking-wider">
+          <p class="text-[12px] uppercase leading-[1.6] tracking-wider">
             {SITE.metier}
           </p>
         </div>
       </div>
     </div>
-  </div>
+  </dialog>
 </header>
 
 <script>
-  const menu = document.getElementById("menu-mobile");
+  const menu = document.getElementById("menu-mobile") as HTMLDialogElement | null;
   const ouvrir = document.getElementById("menu-ouvrir");
   const fermer = document.getElementById("menu-fermer");
 
-  function basculer(ouvert: boolean) {
-    menu?.classList.toggle("hidden", !ouvert);
-    menu?.classList.toggle("flex", ouvert);
-    ouvrir?.setAttribute("aria-expanded", String(ouvert));
-    document.body.style.overflow = ouvert ? "hidden" : "";
-    (ouvert ? fermer : ouvrir)?.focus();
-  }
+  ouvrir?.addEventListener("click", () => {
+    menu?.showModal();
+    ouvrir.setAttribute("aria-expanded", "true");
+    document.body.style.overflow = "hidden";
+    fermer?.focus();
+  });
+  fermer?.addEventListener("click", () => menu?.close());
 
-  ouvrir?.addEventListener("click", () => basculer(true));
-  fermer?.addEventListener("click", () => basculer(false));
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !menu?.classList.contains("hidden"))
-      basculer(false);
+  // Appelé à chaque fermeture : bouton « Fermer » ou touche Échap (gérée par le navigateur)
+  menu?.addEventListener("close", () => {
+    ouvrir?.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = "";
+    ouvrir?.focus();
+  });
+
+  // Passage en affichage desktop menu ouvert : le menu est masqué (lg:hidden), on le ferme
+  // pour que le reste de la page ne reste pas inerte.
+  matchMedia("(min-width: 1024px)").addEventListener("change", (e) => {
+    if (e.matches && menu?.open) menu.close();
   });
 </script>

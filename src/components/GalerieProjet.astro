@@ -1,6 +1,7 @@
 ---
 interface Props {
-  images: { src: string; alt: string }[];
+  // width / height : dimensions réelles, lues dans le fichier (dimensionsImage), pour réserver la place de l'image
+  images: { src: string; alt: string; width?: number; height?: number }[];
   titre?: string;
 }
 const { images, titre = "Galerie" } = Astro.props;
@@ -24,7 +25,9 @@ const plusieurs = images.length > 1;
           <img
             src={image.src}
             alt={image.alt}
-            class="block h-auto w-full transition-transform duration-500 group-hover:scale-105 group-focus-visible:scale-105"
+            width={image.width}
+            height={image.height}
+            class="block h-auto w-full transition-transform duration-500 motion-safe:group-hover:scale-105 motion-safe:group-focus-visible:scale-105"
             loading={i < 4 ? "eager" : "lazy"}
             decoding="async"
           />

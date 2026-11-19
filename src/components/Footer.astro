@@ -97,10 +97,20 @@ const liens = [
       <img src={serpent.src} alt="" width="47" height="47" class="size-11.75" />
       <div class="text-left">
         <p class="text-[18px] leading-loose">{SITE.nom}</p>
-        <p class="text-[10px] uppercase leading-[1.6] tracking-wider">
+        <p class="text-[12px] uppercase leading-[1.6] tracking-wider">
           {SITE.metier}
         </p>
       </div>
     </div>
   </div>
+
+  <!-- Choix du curseur : affiché seulement quand le curseur personnalisé peut être activé (voir Curseur.astro) -->
+  <p class="bouton-curseur-ligne justify-center pb-6 lg:pb-8">
+    <button
+      type="button"
+      class="bouton-curseur text-[12px] text-vert-clair underline underline-offset-4 hover:text-jaune lg:text-[14px]"
+    >
+      Désactiver le curseur personnalisé
+    </button>
+  </p>
 </footer>

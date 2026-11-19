@@ -3,7 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import OutilItem from "../../components/OutilItem.astro";
 import GalerieProjet from "../../components/GalerieProjet.astro";
 import { getProjet, getProjetParSlug, slugProjet, getOutilsDuProjet, getImagesDuProjet } from "../../lib/db";
-import { urlImageCard, urlImageGalerie, stripHtml } from "../../js/backend";
+import { urlImageCard, urlImageGalerie, dimensionsImage, stripHtml } from "../../js/backend";
 
 const param = Astro.params.slug ?? "";
 
@@ -21,6 +21,7 @@ if (!projet) return Astro.rewrite("/404");
 const id = projet.idProjet;
 const outils = getOutilsDuProjet(id);
 const imageCard = urlImageCard(projet);
+const tailleCard = dimensionsImage(projet.imageCard);
 const description = stripHtml(projet.descriptionProjet);
 // On ne garde que les images réellement affichables.
 // Le texte alternatif vient de IMAGE.altImg (il s'affiche aussi en légende au survol).
@@ -28,8 +29,9 @@ const images = getImagesDuProjet(id)
   .map((i, idx) => ({
     src: urlImageGalerie(i),
     alt: i.altImg?.trim() || `${projet.nomProjet} – image ${idx + 1}`,
+    ...dimensionsImage(i.img),
   }))
-  .filter((i): i is { src: string; alt: string } => Boolean(i.src));
+  .filter((i): i is typeof i & { src: string } => Boolean(i.src));
 
 // Sommaire : « Compétences » + chaque <h2> du contenu stocké en base (on leur ajoute un id pour les ancres).
 const sommaire: { id: string; titre: string }[] = [];
@@ -77,6 +79,8 @@ const contenu = (projet.contenuPageProjet ?? "").replace(
           <img
             src={imageCard}
             alt={`Aperçu du projet ${projet.nomProjet}`}
+            width={tailleCard?.width}
+            height={tailleCard?.height}
             class="size-full object-cover"
           />
         )}

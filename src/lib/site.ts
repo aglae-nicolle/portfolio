@@ -7,6 +7,8 @@ export const SITE = {
   telephoneLien: '+33695987151',
   // Fichier du CV (dans public/) utilisé par les boutons « Télécharger mon CV »
   cv: '/CV.pdf',
+  // Format et poids du CV, annoncés dans les liens de téléchargement. À mettre à jour si le fichier change.
+  cvInfos: 'PDF, 250 Ko',
   // Description par défaut (balise meta) si une page n'en donne pas
   description: 'Portfolio d’Aglaé Nicolle, étudiante en BUT MMI à Montbéliard et développeuse web full stack : projets, compétences et CV.',
   // Profils publics, repris dans les données structurées de l'accueil (sameAs). À compléter si besoin.

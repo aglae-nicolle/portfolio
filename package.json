@@ -11,7 +11,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "db:init": "node scripts/init-db.mjs",
-    "db:image": "node scripts/import-image.mjs"
+    "db:image": "node scripts/import-image.mjs",
+    "db:recompresser": "bun scripts/recompresser-images.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^11.1.12",

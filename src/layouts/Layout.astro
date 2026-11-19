@@ -64,14 +64,21 @@ const titreComplet = `${title} | ${SITE.nom}`;
 
     <link rel="icon" href={logo.src} type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap.xml" />
-    <link rel="preload" href="/fonts/kingred.otf" as="font" type="font/otf" crossorigin />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Mulish&display=swap" rel="stylesheet" />
+    <!-- Polices hébergées sur le site (voir global.css) : on précharge celles de la première vue -->
+    <link rel="preload" href="/fonts/kingred.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body class="flex min-h-screen flex-col">
+    <!-- Lien d'évitement : premier élément atteint avec Tab. Placé au-dessus de l'écran,
+         il descend quand il reçoit le focus. -->
+    <a
+      href="#contenu"
+      class="btn fixed left-4 top-4 z-60 -translate-y-[200%] focus:translate-y-0"
+    >
+      Aller au contenu
+    </a>
     <Header />
-    <main class="flex-1">
+    <main id="contenu" tabindex="-1" class="flex-1 focus:outline-none">
       <slot />
     </main>
     <Footer />

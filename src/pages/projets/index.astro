@@ -33,8 +33,9 @@ const projets = getProjets(filtre);
             href={href}
             aria-current={actif ? "page" : undefined}
             class:list={[
-              "text-btn relative border-b-[1.5px] border-vert-clair pb-px text-center text-vert-fonce transition-opacity hover:opacity-100 lg:pb-2.75",
-              !actif && "lg:opacity-60",
+              "text-btn relative border-b-[1.5px] border-vert-clair pb-px text-center text-vert-fonce transition-colors hover:text-vert-fonce max-lg:tracking-[0.02em] lg:pb-2.75",
+              // Onglets inactifs en gris plein (6,9:1 sur le beige) plutôt qu'en opacité réduite (2,89:1)
+              !actif && "lg:text-beige-80",
               i === 0 && "lg:pl-30.75 lg:text-left",
               i === FILTRES.length - 1 && "lg:pr-35 lg:text-right",
             ]}
@@ -59,7 +60,7 @@ const projets = getProjets(filtre);
     <ul class="mt-4.75 flex flex-col items-center gap-3.25 px-7.25 lg:hidden">
       {projets.map((p) => (
         <li class="w-full max-w-88.25">
-          <ProjectCard projet={p} variante="horizontale" />
+          <ProjectCard projet={p} variante="horizontale" niveau="h2" />
         </li>
       ))}
     </ul>
@@ -68,7 +69,7 @@ const projets = getProjets(filtre);
     <ul class="mx-auto hidden max-w-282.75 grid-cols-4 gap-x-12.25 gap-y-15 pt-21.25 lg:grid">
       {projets.map((p) => (
         <li>
-          <ProjectCard projet={p} />
+          <ProjectCard projet={p} niveau="h2" />
         </li>
       ))}
     </ul>

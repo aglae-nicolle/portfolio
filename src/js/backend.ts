@@ -99,6 +99,53 @@ export function reponseImage(value: unknown, requete: Request): Response {
     return new Response(image.bytes, { headers: entetes });
 }
 
+/**
+ * Largeur et hauteur d'une image en BLOB, lues dans l'en-tête du fichier (PNG, JPEG, WebP, GIF).
+ * Elles servent aux attributs width / height des <img> : le navigateur réserve la place de l'image
+ * avant son chargement, et la page ne « saute » pas. Pas de colonne en base, donc rien à migrer.
+ * Renvoie null pour un chemin, un SVG ou un format non reconnu.
+ */
+export function dimensionsImage(value: unknown): { width: number; height: number } | null {
+    const image = lireImage(value);
+    if (!image || "url" in image) return null;
+    const b = image.bytes;
+    try {
+        switch (image.mime) {
+            case "image/png":
+                return { width: b.readUInt32BE(16), height: b.readUInt32BE(20) };
+            case "image/gif":
+                return { width: b.readUInt16LE(6), height: b.readUInt16LE(8) };
+            case "image/webp": {
+                const bloc = b.toString("ascii", 12, 16);
+                if (bloc === "VP8X") return { width: 1 + b.readUIntLE(24, 3), height: 1 + b.readUIntLE(27, 3) };
+                if (bloc === "VP8 ") return { width: b.readUInt16LE(26) & 0x3fff, height: b.readUInt16LE(28) & 0x3fff };
+                if (bloc === "VP8L") {
+                    const bits = b.readUInt32LE(21);
+                    return { width: (bits & 0x3fff) + 1, height: ((bits >> 14) & 0x3fff) + 1 };
+                }
+                return null;
+            }
+            case "image/jpeg": {
+                // On parcourt les segments jusqu'à l'en-tête de trame (SOF0 à SOF15, sauf C4, C8 et CC).
+                let i = 2;
+                while (i + 9 < b.length) {
+                    if (b[i] !== 0xff) return null;
+                    const marqueur = b[i + 1];
+                    if (marqueur === 0xff) { i++; continue; }
+                    if (marqueur >= 0xc0 && marqueur <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marqueur))
+                        return { width: b.readUInt16BE(i + 7), height: b.readUInt16BE(i + 5) };
+                    if (marqueur === 0xd8 || marqueur === 0x01 || (marqueur >= 0xd0 && marqueur <= 0xd7)) { i += 2; continue; }
+                    i += 2 + b.readUInt16BE(i + 2);
+                }
+                return null;
+            }
+        }
+    } catch {
+        // Fichier tronqué : on se passe des dimensions.
+    }
+    return null;
+}
+
 /** Code SVG d'une icône stockée directement en base (OUTILS.iconOutils), sinon null. */
 export function getInlineSvg(value: unknown): string | null {
     return typeof value === "string" && value.trim().startsWith("<svg") ? value : null;

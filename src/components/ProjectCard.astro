@@ -3,14 +3,18 @@
 // - "verticale"   : 246 × 427 (carrousel de l'accueil, grille desktop de /projets)
 // - "horizontale" : 353 × 122 (liste mobile de /projets)
 import { slugProjet, type Projet } from "../lib/db";
-import { urlImageCard } from "../js/backend.ts";
+import { urlImageCard, dimensionsImage } from "../js/backend.ts";
 
 interface Props {
   projet: Projet & { ecoles?: string };
   variante?: "verticale" | "horizontale";
+  /** Niveau du titre : h3 sous un h2 (carrousel de l'accueil), h2 directement sous le h1 (/projets). */
+  niveau?: "h2" | "h3";
 }
-const { projet, variante = "verticale" } = Astro.props;
+const { projet, variante = "verticale", niveau = "h3" } = Astro.props;
+const Titre = niveau;
 const image = urlImageCard(projet);
+const taille = dimensionsImage(projet.imageCard);
 const lien = `/projets/${slugProjet(projet.nomProjet)}`;
 // Mêmes noms que dans projets/[id].astro : le navigateur fait « voyager » l'image et le titre
 // de la carte jusqu'à l'en-tête de la page projet (View Transitions, voir global.css).
@@ -21,23 +25,23 @@ const vtTitre = `projet-titre-${projet.idProjet}`;
 {variante === "verticale" ? (
   <a
     href={lien}
-    class="carte-projet group flex h-106.75 w-61.5 shrink-0 flex-col overflow-hidden rounded-[15px] bg-marron-clair transition-transform hover:-translate-y-1"
+    class="carte-projet group flex h-106.75 w-61.5 shrink-0 flex-col overflow-hidden rounded-[15px] bg-marron-clair transition-transform motion-safe:hover:-translate-y-1"
   >
     <div
       class="aspect-square w-full shrink-0 overflow-hidden rounded-t-[15px] bg-beige"
       style={`view-transition-name: ${vtImage}`}
     >
       {image && (
-        <img src={image} alt="" class="size-full object-cover" loading="lazy" />
+        <img src={image} alt="" width={taille?.width} height={taille?.height} class="size-full object-cover" loading="lazy" />
       )}
     </div>
     <div class="flex flex-1 flex-col pl-9.75 pr-4 pt-2.5">
-      <h3
-        class="text-[30px] leading-loose text-marron-fonce"
+      <Titre
+        class="font-body text-[30px] leading-loose text-marron-fonce"
         style={`view-transition-name: ${vtTitre}`}
       >
         {projet.nomProjet}
-      </h3>
+      </Titre>
       <div
         class="mt-1 line-clamp-4 text-[14px] leading-tight text-vert-fonce [&_p]:inline"
         set:html={projet.descriptionProjet ?? ""}
@@ -54,16 +58,16 @@ const vtTitre = `projet-titre-${projet.idProjet}`;
       style={`view-transition-name: ${vtImage}`}
     >
       {image && (
-        <img src={image} alt="" class="size-full object-cover" loading="lazy" />
+        <img src={image} alt="" width={taille?.width} height={taille?.height} class="size-full object-cover" loading="lazy" />
       )}
     </div>
     <div class="min-w-0 flex-1 pl-4 pr-3.75 pt-2">
-      <h3
-        class="truncate text-[18px] leading-loose text-marron-fonce"
+      <Titre
+        class="truncate font-body text-[18px] leading-loose text-marron-fonce"
         style={`view-transition-name: ${vtTitre}`}
       >
         {projet.nomProjet}
-      </h3>
+      </Titre>
       <div
         class="mt-0.5 line-clamp-4 font-mulish text-[12px] leading-tight text-vert-fonce [&_p]:inline"
         set:html={projet.descriptionProjet ?? ""}

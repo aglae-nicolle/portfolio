@@ -17,6 +17,11 @@ import { SITE } from "../lib/site";
         src={pdp}
         alt="Image d'une paquerette avec un visage qui sourit"
         loading="eager"
+        width={404}
+        height={404}
+        widths={[294, 404, 721]}
+        sizes="(min-width: 1024px) 404px, 147px"
+        fit="cover"
         class="size-36.75 rounded-[15px] object-cover object-[50%_60%] lg:row-span-2 lg:size-101 lg:self-center lg:rounded-[40px]"
       />
       <p class="text-[14px] leading-tight lg:text-b1 lg:mt-8.75 lg:max-w-167">
@@ -39,9 +44,9 @@ import { SITE } from "../lib/site";
         <a
           href={SITE.cv}
           download
-          class="btn mt-14.5 w-53.25 lg:mt-14.75 lg:w-86"
+          class="btn mt-14.5 min-w-53.25 lg:mt-14.75 lg:w-86"
         >
-          &lt;Télécharger mon CV&gt;
+          &lt;Télécharger mon CV&gt;<span class="sr-only"> ({SITE.cvInfos})</span>
         </a>
       </div>
     </div>

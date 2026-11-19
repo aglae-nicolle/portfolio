@@ -45,7 +45,7 @@ de l'accueil, et `ordreOutils` l'ordre d'affichage. `iconOutils` contient le cod
 ## Structure
 
 ```text
-db/            schéma, données de test et base SQLite
+data/            schéma, données de test et base SQLite
 public/        fichiers servis tels quels (polices, favicon, CV)
 scripts/       scripts de gestion de la base (init-db.mjs, import-image.mjs)
 src/

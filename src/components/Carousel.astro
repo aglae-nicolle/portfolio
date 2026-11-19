@@ -13,7 +13,7 @@ const { projets } = Astro.props;
 <div class="relative">
   <ul
     id="carousel"
-    class="flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-6 py-5 scrollbar-none lg:px-0 [&::-webkit-scrollbar]:hidden"
+    class="flex snap-x snap-mandatory gap-5 overflow-x-auto motion-safe:scroll-smooth px-6 py-5 scrollbar-none lg:px-0 [&::-webkit-scrollbar]:hidden"
   >
     {projets.map((p) => (
       <li class="snap-start">
