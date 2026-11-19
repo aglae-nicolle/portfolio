@@ -45,7 +45,7 @@ Statuts utilisés : **Conforme**, **Corrigé**, **À corriger**, **À vérifier 
 
 - « Consulter le site » s'ouvre dans un nouvel onglet et l'annonce maintenant en `sr-only`.
 - Hiérarchie des titres : sur `/projets`, les titres des cartes étaient des `<h3>` directement sous le `<h1>`. `ProjectCard` reçoit maintenant le niveau du titre : `<h2>` sur `/projets`, `<h3>` dans le carrousel de l'accueil (sous un `<h2>`).
-- Contraste des filtres inactifs : l'opacité de 60 % donnait 2,89:1. Ils sont maintenant en `text-beige-80`, une couleur pleine à 6,9:1.    
+- Contraste des filtres inactifs : l'opacité de 60 % donnait 2,89:1. Ils sont maintenant en `text-beige-80`, une couleur pleine à 6,9:1.
 - Lien « Aller au contenu » ajouté dans `Layout.astro`. C'est le premier élément atteint avec Tab : invisible au départ, il apparaît quand il reçoit le focus et mène au `<main>`.
 - Menu mobile : c'est maintenant un `<dialog>` ouvert avec `showModal()`. Le focus reste piégé dans le menu, Échap le ferme et le focus revient sur le bouton « Ouvrir le menu ».
 - Curseur personnalisé : un bouton dans le footer permet de le désactiver (choix gardé dans `localStorage`), ce qui rend le curseur du système, par exemple le grand curseur réglé dans Windows. Il n'est jamais activé quand l'utilisateur demande un contraste élevé (`prefers-contrast: more`).
@@ -140,8 +140,7 @@ Scores mesurés sur le site en ligne :
 
 Ordre prévu pour la suite :
 
-1. Lancer la recompression des images sur le VPS. C'est ce qui devrait le plus faire remonter l'EcoIndex de la page Olyvia. Relever ensuite les scores à nouveau.
-2. Retrouver la licence de la police Kingred.
+1. Remplacer l'image en png de Olyvia par un format WebP. Relever ensuite les scores à nouveau.
 
 ## Suivi des corrections
 
