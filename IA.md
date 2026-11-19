@@ -13,12 +13,12 @@ Document synthétisé à partir de cinq récapitulatifs de session. Dernière mi
 | Date                               | Sujet                                                                                                                              |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | Phase initiale (date non indiquée) | Analyse de la maquette Figma, revue du modèle de données                                                                           |
-| 12 novembre                        | Affichage des données depuis SQLite, intégration de la maquette, galerie d'images, animations, correction des erreurs de l'éditeur |
-| 15 novembre                        | Mise en ligne sur le VPS : workflow GitHub Actions, build hors du VPS, diagnostic DNS                                              |
-| 17 novembre                        | Ajustements de pages (CV, hero, favicon, mise en page « À propos », style des titres)                                              |
-| 17-18 novembre                     | Aide à DataGrip et à la mise à jour de la base sur le VPS                                                                          |
-| 18-19 novembre                     | Création de l'instance Infomaniak, routage de l'IP, tutoriel d'hébergement, dépannage du service systemd                           |
-| 19 novembre                        | Rédaction de ce document                                                                                                           |
+| Semaine 2 (12 -> 18 oct.)          | Affichage des données depuis SQLite, intégration de la maquette, galerie d'images, animations, correction des erreurs de l'éditeur |
+| Semaine 3 (19 -> 25 oct.)          | Mise en ligne sur le VPS : workflow GitHub Actions, build hors du VPS, diagnostic DNS                                              |
+| Semaine 4 (02 -> 08 nov.)          | Ajustements de pages (CV, hero, favicon, mise en page « À propos », style des titres)                                              |
+| Semaine 4-5 (02 -> 15 nov.)        | Aide à DataGrip et à la mise à jour de la base sur le VPS                                                                          |
+| Semaine 5-6 (15 -> 19 nov.)        | Création de l'instance Infomaniak, routage de l'IP, tutoriel d'hébergement, dépannage du service systemd                           |
+| Semaine 6 (16 -> 19 nov.)          | Rédaction de ce document                                                                                                           |
 
 ---
 
